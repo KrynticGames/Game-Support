@@ -23,7 +23,7 @@ const web = path.join(output, 'www');
 fs.rmSync(output, { recursive: true, force: true });
 fs.mkdirSync(web, { recursive: true });
 let html = fs.readFileSync(source, 'utf8');
-if (!/<html[\\s>]/i.test(html) || html.length < 100000) throw new Error('Game source does not look complete');
+if (!/<html(?:\\s|>)/i.test(html) || html.length < 100000) throw new Error('Game source does not look complete');
 html = html.replaceAll('../game-activity.js', './game-activity.js');
 html = html.replaceAll('../word-havoc-support.html', './support.html')
            .replaceAll('../word-havoc-privacy.html', './privacy.html')
