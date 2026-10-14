@@ -32,3 +32,11 @@ Relevant Apple instructions:
 - https://developer.apple.com/help/app-store-connect/manage-builds/upload-builds/
 - https://developer.apple.com/help/app-store-connect/manage-submissions-to-app-review/submit-an-app
 - https://developer.apple.com/help/app-store-connect/reference/app-information/screenshot-specifications/
+
+## Final-check update (October 14)
+- Latest observed GitHub iOS simulator workflow succeeded (run 38611647739). This is UNSIGNED and not a TestFlight upload.
+- Hosted support pages now point consistently to krynticgames@gmail.com.
+- Both public privacy pages prominently say DRAFT. These cannot be represented as approved operative privacy policies until live build data flows, third parties, retention, and deletion are verified and the pages finalized.
+- Word Havoc audited release master ZIP exists separately; its packaged www/index.html SHA-256 differs from Word_Havoc_1.0.0_FINAL_AUDIT2.html. Full audited native project has not been imported into GitHub for release signing.
+- Brain Attack latest requested graphics and gameplay changes and physical iPhone play remain unverified. Latest simulator success does not prove those tests.
+- Apple Developer membership, contracts, signed .ipa, TestFlight install, store listing/screenshots, and submission cannot be verified with currently connected apps. Do not label either game APPLE UPLOAD READY yet.
