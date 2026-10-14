@@ -1893,6 +1893,7 @@ button:focus-visible,.cell:focus-visible,summary:focus-visible,a:focus-visible{o
 @media(prefers-reduced-motion:reduce){#startOverlay .simpleMode{transition:none!important}#startOverlay .simpleMode:hover{transform:none!important}}
 
 </style>
+<script src="../game-activity.js" data-game="word-havoc"></script>
 </head>
 <body>
 <div class="shell">
@@ -2076,7 +2077,7 @@ button:focus-visible,.cell:focus-visible,summary:focus-visible,a:focus-visible{o
     </details>
 
     <div class="lobbyStatus compactLobby" id="launchStatus"></div>
-    <div class="simpleFooter"><button class="textBtn" id="launchHelpBtn">How to Play</button><div class="legalLinks"><a href="https://lexrampart-site-production.up.railway.app/privacy" target="_blank" rel="noopener">Privacy</a><a href="https://lexrampart-site-production.up.railway.app/support" target="_blank" rel="noopener">Support</a><a href="https://lexrampart-site-production.up.railway.app/terms" target="_blank" rel="noopener">Terms</a></div></div>
+    <div class="simpleFooter"><button class="textBtn" id="launchHelpBtn">How to Play</button><div class="legalLinks"><a href="../word-havoc-privacy.html" target="_blank" rel="noopener">Privacy</a><a href="https://lexrampart-site-production.up.railway.app/support" target="_blank" rel="noopener">Support</a><a href="https://lexrampart-site-production.up.railway.app/terms" target="_blank" rel="noopener">Terms</a></div></div>
   </div>
 </div>
 
@@ -2102,7 +2103,7 @@ button:focus-visible,.cell:focus-visible,summary:focus-visible,a:focus-visible{o
       <label><span>Subtle sound effects</span><input type="checkbox" id="soundToggle"></label>
       <label><span>Reduced motion</span><input type="checkbox" id="motionToggle"></label>
     </div>
-    <div class="legalLinks" style="justify-content:center;margin:0 0 14px"><a href="https://lexrampart-site-production.up.railway.app/privacy" target="_blank" rel="noopener">Privacy Policy</a><a href="https://lexrampart-site-production.up.railway.app/support" target="_blank" rel="noopener">Support</a><a href="https://lexrampart-site-production.up.railway.app/terms" target="_blank" rel="noopener">Terms</a></div>
+    <div class="legalLinks" style="justify-content:center;margin:0 0 14px"><a href="../word-havoc-privacy.html" target="_blank" rel="noopener">Privacy Policy</a><a href="https://lexrampart-site-production.up.railway.app/support" target="_blank" rel="noopener">Support</a><a href="https://lexrampart-site-production.up.railway.app/terms" target="_blank" rel="noopener">Terms</a></div>
     <div class="nativeBadge">Word Havoc 1.0.0 • Friend matches are unranked.</div>
     <button class="btn primary" id="closeSettingsBtn">Close</button>
   </div>
@@ -130248,6 +130249,7 @@ zzz`.split('\n'));
   function shuffle(a){ for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; }
   function draw(n){ const out=[]; while(n-- > 0 && bag.length) out.push(bag.pop()); return out; }
   function newGame(skipReady=false){
+    window.KrynticActivity?.reset();
     cancelTurnTransition();moveBusy=false;$('passOverlay').classList.remove('show');
     clearTimeout(moveResultHideTimer);clearTimeout(scoreBurstTimer);$('moveResult')?.classList.remove('show');$('scoreBurst')?.classList.remove('show');
     pauseClock();
@@ -130256,7 +130258,7 @@ zzz`.split('\n'));
     const limit=TIMER_PRESETS[timerPreset]; clocks=[limit,limit]; clockRunning=false; clockLast=Date.now();
     $('p1Name').textContent=playerNames[0]; $('p2Name').textContent=playerNames[1];
     $('modeSelect').value=gameMode; $('beginTurnBtn').disabled=false;$('overlaySecondaryBtn').style.display='none'; $('difficultySelect').value=cpuDifficulty; $('difficultySelect').style.display=gameMode==='cpu'?'inline-block':'none'; $('timerSelect').value=timerPreset; $('battlefieldSelect').value=battlefieldPreset; $('beginTurnBtn').style.display='block';
-    logEl.innerHTML=''; const starter=playerLabel(turn); setStatus(`${starter}: opening attack must cross the center medallion.`,'info'); renderAll(); updateConnectionBanner(); if(skipReady){matchStarted=true;startClock();if(gameMode==='online')syncOnlineState();}else showMatchReady();
+    logEl.innerHTML=''; const starter=playerLabel(turn); setStatus(`${starter}: opening attack must cross the center medallion.`,'info'); renderAll(); updateConnectionBanner(); if(skipReady){matchStarted=true;window.KrynticActivity?.start(gameMode);startClock();if(gameMode==='online')syncOnlineState();}else showMatchReady();
   }
 
   function playerLabel(i){if(gameMode==='cpu')return i===0?playerNames[0]:'Computer';return playerNames[i]||`Player ${i+1}`;}
@@ -130347,7 +130349,7 @@ zzz`.split('\n'));
     if(Number.isInteger(m.bagCount))bag=Array(Math.max(0,m.bagCount)).fill('?');
     players=m.players||players;
     turn=Number.isInteger(m.turn)?m.turn:turn;
-    battleControl=new Map(m.battleControl||[]);passStreak=m.passStreak||0;stats=m.stats||stats;gameOver=!!m.gameOver;siegeThreatPlayer=m.siegeThreatPlayer??null;lastMoveCells=m.lastMoveCells||[];lastMovePlayer=m.lastMovePlayer??null;reforgedThisTurn=!!m.reforgedThisTurn;lastAttackSummary=Array.isArray(m.lastAttackSummary)?m.lastAttackSummary:[null,null];clocks=m.clocks||clocks;matchStarted=!!m.matchStarted;onlineMatchId=String(m.onlineMatchId||onlineMatchId);timerPreset=m.timerPreset||timerPreset;applyBattlefieldPreset(m.battlefieldPreset||battlefieldPreset);playerNames=(m.playerNames||playerNames).map((x,i)=>cleanName(x,`Player ${i+1}`));$('p1Name').textContent=playerNames[0];$('p2Name').textContent=playerNames[1];$('modeSelect').value='online';$('difficultySelect').style.display='none';$('timerSelect').value=timerPreset;$('battlefieldSelect').value=battlefieldPreset;if(typeof m.logHtml==='string'){const t=document.createElement('template');t.innerHTML=m.logHtml;for(const el of [...t.content.querySelectorAll('*')]){if(!['DIV','B','SPAN','BR'].includes(el.tagName)){el.replaceWith(document.createTextNode(el.textContent||''));continue;}for(const attr of [...el.attributes])el.removeAttribute(attr.name);if(el.tagName==='DIV')el.className='logItem';}logEl.replaceChildren(t.content);}placements=[];selectedRack.clear();$('passOverlay').classList.remove('show');$('beginTurnBtn').disabled=false;$('overlaySecondaryBtn').style.display='none';$('startOverlay').classList.remove('show');renderAll();updateConnectionBanner();if(m.result){if(m.result.draw)showStalemate(true);else showGameOver(m.result.winner,m.result.data||{},true);}else if(!gameOver){startClock();setStatus(isLocalTurn()?'Your turn — build your attack.':`${playerLabel(turn)} is thinking…`,'info');}
+    battleControl=new Map(m.battleControl||[]);passStreak=m.passStreak||0;stats=m.stats||stats;gameOver=!!m.gameOver;siegeThreatPlayer=m.siegeThreatPlayer??null;lastMoveCells=m.lastMoveCells||[];lastMovePlayer=m.lastMovePlayer??null;reforgedThisTurn=!!m.reforgedThisTurn;lastAttackSummary=Array.isArray(m.lastAttackSummary)?m.lastAttackSummary:[null,null];clocks=m.clocks||clocks;if(m.matchStarted&&!matchStarted)window.KrynticActivity?.start('online');matchStarted=!!m.matchStarted;onlineMatchId=String(m.onlineMatchId||onlineMatchId);timerPreset=m.timerPreset||timerPreset;applyBattlefieldPreset(m.battlefieldPreset||battlefieldPreset);playerNames=(m.playerNames||playerNames).map((x,i)=>cleanName(x,`Player ${i+1}`));$('p1Name').textContent=playerNames[0];$('p2Name').textContent=playerNames[1];$('modeSelect').value='online';$('difficultySelect').style.display='none';$('timerSelect').value=timerPreset;$('battlefieldSelect').value=battlefieldPreset;if(typeof m.logHtml==='string'){const t=document.createElement('template');t.innerHTML=m.logHtml;for(const el of [...t.content.querySelectorAll('*')]){if(!['DIV','B','SPAN','BR'].includes(el.tagName)){el.replaceWith(document.createTextNode(el.textContent||''));continue;}for(const attr of [...el.attributes])el.removeAttribute(attr.name);if(el.tagName==='DIV')el.className='logItem';}logEl.replaceChildren(t.content);}placements=[];selectedRack.clear();$('passOverlay').classList.remove('show');$('beginTurnBtn').disabled=false;$('overlaySecondaryBtn').style.display='none';$('startOverlay').classList.remove('show');renderAll();updateConnectionBanner();if(m.result){if(m.result.draw)showStalemate(true);else showGameOver(m.result.winner,m.result.data||{},true);}else if(!gameOver){startClock();setStatus(isLocalTurn()?'Your turn — build your attack.':`${playerLabel(turn)} is thinking…`,'info');}
   }
   function sendGuestAction(action,data={}){
     if(gameMode!=='online'||onlineRole!=='guest'||!onlineConn||!onlineConn.open||onlineActionPending)return false;
@@ -130606,7 +130608,7 @@ zzz`.split('\n'));
   }
   function getMatchHistory(){try{return JSON.parse(storage.getItem('wordHavocMatchHistory')||'[]')}catch(e){return []}}
   function recordMatch(winner){
-    if(matchRecorded)return; matchRecorded=true; const history=getMatchHistory();
+    if(matchRecorded)return; matchRecorded=true; window.KrynticActivity?.finish(); const history=getMatchHistory();
     history.push({v:'1.0.0',mode:gameMode,difficulty:cpuDifficulty,timer:timerPreset,turns:stats.turns,totalDamage:stats.totalDamage,biggestHit:stats.biggestHit,swaps:stats.swaps,combos:stats.combos,captures:stats.captures,counters:stats.counters,timeouts:stats.timeouts,winner,p1hp:Math.max(0,players[0].hp),p2hp:Math.max(0,players[1].hp),p1armor:players[0].armor||0,p2armor:players[1].armor||0,control:controlCounts(),at:Date.now()});
     storage.setItem('wordHavocMatchHistory',JSON.stringify(history.slice(-20)));
   }
@@ -130894,7 +130896,7 @@ zzz`.split('\n'));
     if(gameOver&&gameMode==='online'){if(pendingIncomingRematch){pendingIncomingRematch=false;if(onlineRole==='host'){newGame(true);syncOnlineState();$('passOverlay').classList.remove('show');}else{onlineConn?.send({type:'rematchAccept'});waitingRematch=true;$('beginTurnBtn').textContent='Waiting for host…';$('beginTurnBtn').disabled=true;}return;}if(!waitingRematch){onlineConn?.send({type:'rematchRequest'});waitingRematch=true;$('beginTurnBtn').textContent='Rematch requested…';$('beginTurnBtn').disabled=true;}return;}
     $('passOverlay').classList.remove('show'); $('beginTurnBtn').style.display='block';$('beginTurnBtn').disabled=false;$('overlaySecondaryBtn').style.display='none';
     if(gameOver){newGame();return;}
-    if(!matchStarted){matchStarted=true;renderAll();startClock();if(isCpuTurn())cpuTakeTurn();return;}
+    if(!matchStarted){matchStarted=true;window.KrynticActivity?.start(gameMode);renderAll();startClock();if(isCpuTurn())cpuTakeTurn();return;}
     if(endTurn()){startClock();if(isCpuTurn())cpuTakeTurn();}
   }
   function initCpuLexicon(){
