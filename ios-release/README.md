@@ -4,7 +4,7 @@ This repo now includes an **unsigned iOS simulator build check** for Word Havoc 
 
 The build uses the current browser files in play/, not the latest full Word Havoc source-ready release ZIP held separately in the publisher's library. Replace the Word Havoc game input with the audited final source before shipping.
 
-Word Havoc has a separately prepared native Capacitor 8 iOS project, app icon, screenshots, release audit, and signing/upload workflow in `Word_Havoc_1.0.0_APPLE_READY_MASTER.zip`; that full package is not yet imported to this repository. Do not discard its release improvements. Brain Attack has an October 2025? [sic] / October 2026 web build here; verify it includes every requested October 12-14 edit.
+Word Havoc has a separately prepared native Capacitor 8 iOS project, app icon, screenshots, release audit, and signing/upload workflow in `Word_Havoc_1.0.0_APPLE_READY_MASTER.zip`; that full package is not yet imported to this repository. Do not discard its release improvements. Brain Attack has an October 2026 web build here; verify it includes every requested October 12-14 edit.
 
 ## Apple requirements
 - Activate Apple Developer membership and accept current agreements.
