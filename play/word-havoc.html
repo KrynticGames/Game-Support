@@ -130510,7 +130510,7 @@ zzz`.split('\n'));
   function renderClocks(){
     const limit=TIMER_PRESETS[timerPreset];
     for(let i=0;i<2;i++){
-      const el=$('clock'+(i+1));if(!el)continue;const shown=(i===turn?clocks[i]:limit);el.textContent=formatClock(shown);el.classList.toggle('activeClock',clockRunning&&turn===i&&!gameOver);
+      const el=$('clock'+(i+1));if(!el)continue;const shown=clocks[i];el.textContent=formatClock(shown);el.classList.toggle('activeClock',clockRunning&&turn===i&&!gameOver);
       el.classList.toggle('clockLow',shown!=null&&shown<=20000&&shown>10000);el.classList.toggle('clockCritical',shown!=null&&shown<=10000&&!gameOver&&i===turn);
     }
     const active=$('activeClock'); if(active){const ms=clocks[turn];active.textContent=formatClock(ms);active.classList.toggle('low',ms!=null&&ms<=20000&&ms>10000);active.classList.toggle('critical',ms!=null&&ms<=10000&&!gameOver);}
@@ -130722,7 +130722,7 @@ zzz`.split('\n'));
 
   function isValidGameWord(word){
     const w=String(word||'').trim().toLowerCase();
-    return !isContentBlocked(w)&&ENGLISH_WORDS.has(w);
+    return /^[a-z]{2,15}$/.test(w)&&!isContentBlocked(w)&&!CPU_PROPER_EXCLUDE.has(w.toUpperCase())&&ENGLISH_WORDS.has(w);
   }
 
   let moveResultHideTimer=null,scoreBurstTimer=null;
@@ -130735,7 +130735,7 @@ zzz`.split('\n'));
     $('moveResultWho').textContent=`${scorer.toUpperCase()} · WORD SCORE`;
     $('moveResultWord').textContent=a.allWords.join(' + ');
     $('moveResultDamage').textContent=`+${appliedDamage} SCORE`;
-    let detail=`Word value ${wordValue}`;
+    let detail=a.wordScores?.length?a.wordScores.map(w=>`${w.word} ${w.base+w.bonus}`).join(' + ')+` = ${wordValue} word points`:`Word value ${wordValue}`;
     if(a.multiplier===2) detail+=` • ×2 letter hit`;
     if(tactical) detail+=` • +${tactical} tactics`;
     if(absorbed) detail+=` • ${absorbed} blocked → ${hpDamage} HP`;
@@ -130784,16 +130784,16 @@ zzz`.split('\n'));
     if(a.captureCount>0)effectText+=` Captured <b>${a.captureCount}</b> battle square${a.captureCount>1?'s':''}.`;
     if(a.claimCount>0)effectText+=` Claimed <b>${a.claimCount}</b> battle square${a.claimCount>1?'s':''}.`;
     if(healed>0)effectText+=` Restored <b>${healed} HP</b>.`;if(fortified>0)effectText+=` Gained <b>${fortified} Armor</b>.`;if(absorbed>0)effectText+=` Opponent armor absorbed <b>${absorbed}</b> damage.`;
-    lastAttackSummary[attacker]={word:a.word,damage:appliedDamage,hpDamage,absorbed}; renderLastAttack();
+    lastAttackSummary[attacker]={word:a.allWords.join(' + '),damage:appliedDamage,hpDamage,absorbed}; renderLastAttack();
     const scorePlate=$('lastAttack'+(attacker+1));if(scorePlate&&!reducedMotion){scorePlate.classList.remove('freshScore');void scorePlate.offsetWidth;scorePlate.classList.add('freshScore');setTimeout(()=>scorePlate.classList.remove('freshScore'),700);}
     const attackerLabel=playerLabel(attacker);if(a.heal>0)sfx('heal');if(a.fortify>0)sfx('armor');if(a.captureCount>0)sfx('capture');else sfx('attack');
-    addLog(`<b>${attackerLabel}</b> played <b>${a.word}</b> for <b>${appliedDamage}</b> attack damage${absorbed?` (${absorbed} blocked, ${hpDamage} HP lost)`:''}.${effectText}`);
+    addLog(`<b>${attackerLabel}</b> played <b>${a.allWords.join(' + ')}</b> for <b>${appliedDamage}</b> attack damage${absorbed?` (${absorbed} blocked, ${hpDamage} HP lost)`:''}.${effectText}`);
     placements=[]; selectedRack.clear(); $('submitBtn').disabled=false;
     if(players[defender].hp<=0){players[defender].hp=0;gameOver=true;renderAll();showGameOver(attacker,{...a,damage:appliedDamage});return;}
     renderHP();
     const overlayEffects=(a.multiplier===2?' <b>×2 HIT</b> activated.':'')+(a.comboBonus?` <b>Crossfire +${a.comboBonus}.</b>`:'')+(a.controlBonus?` <b>Control +${a.controlBonus}.</b>`:'')+(a.breachBonus?` <b>Breach +${a.breachBonus}.</b>`:'')+(a.counterBonus?` <b>Counterstrike +${a.counterBonus}.</b>`:'')+(a.captureCount?` Captured <b>${a.captureCount}</b> battle square${a.captureCount>1?'s':''}.`:'')+(healed>0?` Restored <b>${healed} HP</b>.`:'')+(fortified>0?` Gained <b>${fortified} Armor</b>.`:'')+(absorbed?` Opponent Armor blocked <b>${absorbed}</b>.`:'');
     showMoveResult(attacker,a,appliedDamage,hpDamage,absorbed);
-    showPass(attacker,appliedDamage,`<b>${a.word}</b> generated ${appliedDamage} attack damage${absorbed?` (${hpDamage} reached HP)`:''}.${overlayEffects}`,true);
+    showPass(attacker,appliedDamage,`<b>${a.allWords.join(' + ')}</b> generated ${appliedDamage} attack damage${absorbed?` (${hpDamage} reached HP)`:''}.${overlayEffects}`,true);
     }finally{moveBusy=false;renderRack();}
   }
 
