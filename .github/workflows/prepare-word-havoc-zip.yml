@@ -1,0 +1,49 @@
+name: Prepare Word Havoc CrazyGames ZIP
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/prepare-word-havoc-zip.yml'
+      - 'distribution/word-havoc/index.html'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out Word Havoc
+        uses: actions/checkout@v4
+
+      - name: Package index.html in the ZIP root
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s distribution/word-havoc/index.html
+          mkdir -p downloads
+          cd distribution/word-havoc
+          zip -9 -q ../../downloads/word-havoc-crazygames.zip index.html
+          cd ../..
+          test "$(unzip -Z1 downloads/word-havoc-crazygames.zip)" = "index.html"
+          unzip -t downloads/word-havoc-crazygames.zip
+
+      - name: Publish easy direct-download file
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add downloads/word-havoc-crazygames.zip
+          if ! git diff --cached --quiet; then
+            git commit -m "Package Word Havoc for CrazyGames upload"
+            git push
+          fi
+
+      - name: Provide backup artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Word-Havoc-CrazyGames-Upload
+          path: downloads/word-havoc-crazygames.zip
