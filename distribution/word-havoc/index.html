@@ -1894,7 +1894,7 @@ button:focus-visible,.cell:focus-visible,summary:focus-visible,a:focus-visible{o
 
 
 /* Browser portal launch: no external account or online-login registration is offered. */
-#chooseOnlineBtn,#launchOnlinePanel{display:none!important}
+/* Online Duel restored: supports multiplayer room codes. */
 </style>
 
 </head>
@@ -131067,7 +131067,7 @@ $('startLocalBtn').addEventListener('click',()=>{initAudio();destroyOnline();gam
   document.body.classList.toggle('reducedMotion',reducedMotion);$('soundToggle').checked=soundEnabled;$('motionToggle').checked=reducedMotion;
   try{const appPlugin=window.Capacitor?.Plugins?.App;if(appPlugin?.addListener){appPlugin.addListener('backButton',()=>{if(!window.wordHavocBack())showMainMenu();});appPlugin.addListener('appStateChange',({isActive})=>{if(!isActive){if(gameMode==='online'){syncClock();if(onlineRole==='host')syncOnlineState();}else pauseClock();}else if(matchStarted&&!gameOver&&gameMode!=='online')startClock();});}}catch(e){}
   
-  renderAccountProfile();newGame();$('passOverlay').classList.remove('show');resetLaunchMenu();$('startOverlay').classList.add('show');updateConnectionBanner('MAIN MENU');
+  renderAccountProfile();void refreshAccount(true);newGame();$('passOverlay').classList.remove('show');resetLaunchMenu();$('startOverlay').classList.add('show');updateConnectionBanner('MAIN MENU');
 })();
 </script>
 </body>
