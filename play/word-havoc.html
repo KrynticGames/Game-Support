@@ -1958,7 +1958,7 @@ button:focus-visible,.cell:focus-visible,summary:focus-visible,a:focus-visible{o
       <div class="card">
         <h3>Attack Preview</h3>
         <div class="preview empty" id="wordPreview">Place a word</div>
-        <div class="damageLine"><span>Damage</span><strong id="damagePreview">0</strong></div>
+        <div class="damageLine"><span>Damage</span><strong id="damagePreview">—</strong></div>
         <div class="tacticalChips" id="tacticalChips"><span>Build a word to preview the battle result.</span></div>
         <div class="lengthBonus" id="bonusPreview">Strike values + length bonus</div>
         <div class="wordList" id="wordsPreview"></div>
@@ -1967,7 +1967,7 @@ button:focus-visible,.cell:focus-visible,summary:focus-visible,a:focus-visible{o
         <h3>Rules at a Glance</h3>
         <div class="rulesCallout">Your <b>WORD SCORE</b> becomes damage. <b>Armor</b> blocks that damage before HP is lost.</div>
         <div class="rules quickRules">
-          <div><strong>On your turn</strong><span>On the opening move, your word must cover the <b>gold center medallion</b>. After that, play one connected English word using your rack, then tap <b>Attack</b>.</span></div>
+          <div><strong>On your turn</strong><span>On the opening move, your word must cover the <b>gold center medallion</b>. After that, place your new tiles in one connected row or column, then tap <b>Attack</b>. Every word formed must be in the dictionary. All words formed earn their full letter and length points; shared letters count in each word.</span></div>
           <div><strong>Armor</strong><span><b>Blue squares</b> grant +8 Armor. Armor is a shield and is spent before HP.</span></div>
           <div><strong>Battle squares</strong><span><b>Green</b> heals +5 HP, <b>red</b> doubles letter damage, <b>blue</b> fortifies.</span></div>
           <div><strong>Reforge</strong><span>Spend HP to replace weak letters. Small Reforges keep your turn.</span></div>
@@ -2085,7 +2085,7 @@ button:focus-visible,.cell:focus-visible,summary:focus-visible,a:focus-visible{o
   <div class="modal wideModal">
     <h2>How to Play Word Havoc</h2>
     <div class="helpGrid">
-      <div><b>1. Start at the center</b><span>Your opening word must cover the gold center medallion. After the first move, every word must connect to the existing board.</span></div><div><b>2. Attack</b><span>Build connected English words. Your WORD SCORE becomes damage, but Armor blocks damage before HP. Armor is your shield.</span></div>
+      <div><b>1. Start at the center</b><span>Your opening word must cover the gold center medallion. After the first move, every word must connect to the existing board.</span></div><div><b>2. Attack</b><span>Every horizontal and vertical word formed must be in the dictionary. All words formed earn letter and length points, including shared letters in each word. Your total WORD SCORE becomes damage, but Armor blocks damage before HP. Armor is your shield.</span></div>
       <div><b>3. HP is also money</b><span>Reforge 1 tile for 2 HP or 2–3 for 5 HP and keep your turn. An emergency full rerack costs 10 HP and ends it.</span></div>
       <div><b>4. Fight for battle squares</b><span>Green heals +5 HP, red doubles letter damage, and silver grants +8 Armor. Armor is a shield that gets used up before HP.</span></div>
       <div><b>5. React to the opponent</b><span>The opponent’s newest tiles glow gold. Build through them for Counterstrike damage. Crossings and captures add extra tactical damage.</span></div>
@@ -130687,14 +130687,17 @@ zzz`.split('\n'));
     }
     const allEntries=[main,...crossEntries];
     const allWords=allEntries.map(x=>x.word);
+    const invalidWords=allWords.filter(w=>!isValidGameWord(w));
+    if(invalidWords.length)return {ok:false,msg:`Not in the dictionary: ${invalidWords.join(', ')}. Every word formed must be valid.`,invalidWords};
+    const wordScores=allEntries.map(entry=>({word:entry.word,base:[...entry.word].reduce((sum,l)=>sum+(VALUES[l]||0),0),bonus:LENGTH_BONUS[entry.word.length]??(23+(entry.word.length-11)*5)}));
     const uniqueCells=new Map();
     for(const entry of allEntries)for(const cell of entry.cells)uniqueCells.set(`${cell.r},${cell.c}`,cell);
     const battleCells=[...uniqueCells.keys()].filter(k=>HEAL_SQUARES.has(k)||ATTACK_SQUARES.has(k)||FORTIFY_SQUARES.has(k)||CONTROL_SQUARES.has(k)||CRIT_SQUARES.has(k));
     const ownedUsed=battleCells.filter(k=>battleControl.get(k)===turn).length;
     const captureCells=battleCells.filter(k=>battleControl.has(k)&&battleControl.get(k)!==turn);
     const claimCells=battleCells.filter(k=>!battleControl.has(k));
-    const base=[...main.word].reduce((s,l)=>s+(VALUES[l]||0),0);
-    const bonus=LENGTH_BONUS[main.word.length]??(23+(main.word.length-11)*5);
+    const base=wordScores.reduce((sum,w)=>sum+w.base,0);
+    const bonus=wordScores.reduce((sum,w)=>sum+w.bonus,0);
     const healCount=placements.filter(p=>HEAL_SQUARES.has(`${p.r},${p.c}`)).length;
     const attackCount=placements.filter(p=>ATTACK_SQUARES.has(`${p.r},${p.c}`)).length;
     const fortifyCount=placements.filter(p=>FORTIFY_SQUARES.has(`${p.r},${p.c}`)).length;
@@ -130711,24 +130714,15 @@ zzz`.split('\n'));
     const counterBonus=counterCells.length>=2?4:(counterCells.length===1?2:0);
     // The red square doubles only the core word attack. Tactical bonuses are added after the multiplier.
     const damage=(base*multiplier)+bonus+comboBonus+controlBonus+critBonus+breachBonus+counterBonus;
-    return {ok:true,word:main.word,allWords,allEntries,crossEntries,crossCount:crossEntries.length,damage,rawDamage,base,bonus,comboBonus,controlBonus,critBonus,breachBonus,counterBonus,counterCount:counterCells.length,counterCells,heal,healCount,fortify,fortifyCount,attackCount,controlTileCount,critCount,multiplier,main,battleCells,captureCells,claimCells,captureCount:captureCells.length,claimCount:claimCells.length,ownedUsed};
+    return {ok:true,word:main.word,allWords,allEntries,wordScores,crossEntries,crossCount:crossEntries.length,damage,rawDamage,base,bonus,comboBonus,controlBonus,critBonus,breachBonus,counterBonus,counterCount:counterCells.length,counterCells,heal,healCount,fortify,fortifyCount,attackCount,controlTileCount,critCount,multiplier,main,battleCells,captureCells,claimCells,captureCount:captureCells.length,claimCount:claimCells.length,ownedUsed};
   }
 
   const CONTENT_BLOCKLIST=new Set(`arsed\narsing\nasshole\nassholes\nblowjob\nblowjobs\nbullshit\nbullshits\nbullshitted\nbullshitter\nbullshitters\nbullshitting\nchink\nchinks\ncocksucker\ncocksuckers\ncrap\ncrapped\ncrapper\ncrappers\ncrapping\ncrappy\ncraps\ncumming\ncums\ncunt\ncunts\ndickhead\ndicks\nfag\nfaggot\nfaggots\nfags\nfart\nfarted\nfarting\nfarts\nfuck\nfucked\nfucking\nfucks\ngook\ngooks\nkike\nkikes\nkillself\nkys\nmotherfucker\nmotherfuckers\nmotherfucking\nnazi\nnazis\nnigga\nniggas\nnigger\nniggers\npiss\npissed\npisser\npissers\npisses\npissing\nrape\nraped\nrapes\nraping\nrapist\nrapists\nretard\nretarded\nretards\nshit\nshits\nshitted\nshitting\nshitty\nslut\nsluts\nspic\nspics\nturd\nturds\ntwat\ntwats\nwank\nwanked\nwanker\nwankers\nwanking\nwanks\nwetback\nwetbacks\nwhore\nwhores`.split('\n'));
   function isContentBlocked(word){return CONTENT_BLOCKLIST.has(String(word||'').toLowerCase());}
 
-  const rememberedWords=new Set(JSON.parse(storage.getItem('wordHavocRememberedWords')||'[]'));
-  let pendingUnknownWords=[];
-  function rememberWords(words){
-    words.forEach(w=>rememberedWords.add(String(w).toLowerCase()));
-    storage.setItem('wordHavocRememberedWords',JSON.stringify([...rememberedWords]));
-  }
-  async function validateWord(word){
-    const w=String(word).trim().toLowerCase();
-    if(isContentBlocked(w))return false;
-    // v1.0 uses only the bundled lexicon for deterministic, offline-safe validation.
-    // Local/CPU play may remember a player-approved rare word; online play never allows manual overrides.
-    return ENGLISH_WORDS.has(w)||rememberedWords.has(w);
+  function isValidGameWord(word){
+    const w=String(word||'').trim().toLowerCase();
+    return !isContentBlocked(w)&&ENGLISH_WORDS.has(w);
   }
 
   let moveResultHideTimer=null,scoreBurstTimer=null;
@@ -130739,7 +130733,7 @@ zzz`.split('\n'));
     const wordValue=(a.base||0)+(a.bonus||0);
     const scorer=gameMode==='cpu'?(who===0?'YOU':'COMPUTER'):(gameMode==='online'&&who===onlinePlayerIndex?'YOU':playerLabel(who));
     $('moveResultWho').textContent=`${scorer.toUpperCase()} · WORD SCORE`;
-    $('moveResultWord').textContent=String(a.word||'MOVE').toUpperCase();
+    $('moveResultWord').textContent=a.allWords.join(' + ');
     $('moveResultDamage').textContent=`+${appliedDamage} SCORE`;
     let detail=`Word value ${wordValue}`;
     if(a.multiplier===2) detail+=` • ×2 letter hit`;
@@ -130747,37 +130741,19 @@ zzz`.split('\n'));
     if(absorbed) detail+=` • ${absorbed} blocked → ${hpDamage} HP`;
     $('moveResultMath').textContent=detail;
     el.className='moveResultBar show '+(who===0?'playerResult':'cpuResult');
-    const burst=$('scoreBurst');if(burst){$('scoreBurstWho').textContent=`${scorer.toUpperCase()} SCORED`;$('scoreBurstValue').textContent=`+${appliedDamage}`;$('scoreBurstWord').textContent=String(a.word||'MOVE').toUpperCase();burst.className='scoreBurst '+(who===0?'playerBurst':'cpuBurst');void burst.offsetWidth;burst.classList.add('show');scoreBurstTimer=setTimeout(()=>burst.classList.remove('show'),3000);}
+    const burst=$('scoreBurst');if(burst){$('scoreBurstWho').textContent=`${scorer.toUpperCase()} SCORED`;$('scoreBurstValue').textContent=`+${appliedDamage}`;$('scoreBurstWord').textContent=a.allWords.join(' + ');burst.className='scoreBurst '+(who===0?'playerBurst':'cpuBurst');void burst.offsetWidth;burst.classList.add('show');scoreBurstTimer=setTimeout(()=>burst.classList.remove('show'),3000);}
     moveResultHideTimer=setTimeout(()=>{el.classList.remove('show');},7200);
   }
 
-  async function submitMove(forceAccept=false){
-    forceAccept=forceAccept===true&&gameMode!=='online';
+  async function submitMove(){
     const automatedCpuMove=gameMode==='cpu'&&turn===1;
     if(gameOver||moveBusy||turnTransition||!matchStarted||(!automatedCpuMove&&!remoteActionProcessing&&!isLocalTurn())||(cpuThinking&&turn===0))return; const a=analyzeMove(); if(!a.ok){setStatus(a.msg,'bad');return;}if(a.allWords.some(isContentBlocked)){setStatus('That word is not permitted in Word Havoc matches.','bad');return;}
     moveBusy=true;const submissionEpoch=matchEpoch;
     try{
     const resumeAfterInvalid=clockRunning; pauseClock(); $('submitBtn').disabled=true; $('acceptWordBtn').style.display='none';
     setStatus(`Checking ${a.allWords.join(', ')}…`,'info');
-    const unknown=[];
-    if(!forceAccept){
-      for(const w of a.allWords){ if(!(await validateWord(w))) unknown.push(w); }
-      if(submissionEpoch!==matchEpoch)return;
-      if(unknown.length){
-        pendingUnknownWords=unknown;
-        $('submitBtn').disabled=false;
-        if(gameMode==='online'){
-          $('acceptWordBtn').style.display='none';
-          setStatus(`${unknown.join(', ')} is not in the competitive dictionary and could not be confirmed. Online matches do not allow manual word overrides.`,`bad`);
-        }else{
-          $('acceptWordBtn').style.display='block';
-          $('acceptWordBtn').textContent=`Accept & Remember ${unknown.join(', ')}`;
-          setStatus(`${unknown.join(', ')} could not be confirmed. If it is a legitimate English word, use Accept & Remember.`,`bad`);
-        }
-        moveBusy=false;renderRack();if(resumeAfterInvalid)startClock(); return;
-      }
-    } else if(pendingUnknownWords.length){ rememberWords(pendingUnknownWords); }
-    pendingUnknownWords=[]; $('acceptWordBtn').style.display='none';
+    if(submissionEpoch!==matchEpoch)return;
+    $('acceptWordBtn').style.display='none';
     if(gameMode==='online'&&onlineRole==='guest'&&!remoteActionProcessing){
       $('submitBtn').disabled=false;
       const sent=sendGuestAction('move',{placements:placements.map(p=>({r:p.r,c:p.c,rackIndex:p.rackIndex}))});
@@ -130911,7 +130887,7 @@ zzz`.split('\n'));
     }
     cpuLexiconReady=true;
   }
-  function cpuWordKnown(w){const x=String(w).toLowerCase();return !isContentBlocked(x)&&(ENGLISH_WORDS.has(x)||rememberedWords.has(x));}
+  function cpuWordKnown(w){return isValidGameWord(w);}
   function cpuWordAllowed(w){const x=String(w).toUpperCase();if((x.length===2&&!CPU_COMMON_2.has(x))||CPU_PROPER_EXCLUDE.has(x))return false;if(cpuDifficulty==='easy'&&/[QJXZ]/.test(x))return false;return true;}
   function rackCounts(rack){const m=Object.create(null);for(const l of rack)m[l]=(m[l]||0)+1;return m;}
   function canBuildFromRack(word,rack){const m=rackCounts(rack);for(const ch of word){if(!m[ch])return false;m[ch]--;}return true;}
@@ -131048,7 +131024,7 @@ zzz`.split('\n'));
     const attackBtn=$('submitBtn');
     if(!a.ok){
       attackBtn?.classList.remove('readyAttack');
-      $('wordPreview').textContent=placements.length?'Incomplete move':'Place a word';$('wordPreview').classList.add('empty');$('damagePreview').textContent='0';$('bonusPreview').textContent='Damage = letter power + length + visible tactical bonuses';$('wordsPreview').textContent='';$('tacticalChips').innerHTML='<span>Build a word to preview the battle result.</span>';return;
+      $('wordPreview').textContent=a.invalidWords?'Invalid word':placements.length?'Incomplete move':'Place a word';$('wordPreview').classList.add('empty');$('damagePreview').textContent='—';$('bonusPreview').textContent=placements.length?a.msg:'Every word formed must be in the dictionary.';$('wordsPreview').textContent='';$('tacticalChips').innerHTML='<span>Build valid connected words to preview the battle result.</span>';return;
     }
     attackBtn?.classList.add('readyAttack');
     $('wordPreview').textContent=a.word;$('wordPreview').classList.remove('empty');$('damagePreview').textContent=a.damage;
@@ -131058,12 +131034,12 @@ zzz`.split('\n'));
     let math=`Letters ${a.base}${a.multiplier===2?' ×2':''}`;if(a.bonus)math+=` + length ${a.bonus}`;if(tacticalDamage)math+=` + tactics ${tacticalDamage}`;math+=` = ${a.damage} damage`;if(armorBlock)math+=` • Armor blocks ${armorBlock} → ${hpDamage} HP`;
     $('bonusPreview').textContent=math+(effects.length?' • '+effects.filter(x=>!x.startsWith('×2 letter hit')&&!x.startsWith('Crossfire')&&!x.startsWith('control')&&!x.startsWith('Breach')&&!x.startsWith('Counterstrike')).join(' • '):'');
     const counts=controlCounts(),futureControl=counts[turn]+a.claimCount+a.captureCount;const chip=[];chip.push(`<span class="hit">${a.damage} DAMAGE</span>`);if(armorBlock)chip.push(`<span>${armorBlock} BLOCKED • ${hpDamage} HP</span>`);if(a.heal)chip.push(`<span class="heal">+${a.heal} HP</span>`);if(a.fortify)chip.push(`<span class="armor">+${a.fortify} ARMOR</span>`);if(a.captureCount)chip.push(`<span>${a.captureCount} CAPTURE${a.captureCount>1?'S':''}</span>`);if(a.comboBonus)chip.push(`<span>CROSSFIRE +${a.comboBonus}</span>`);if(a.counterBonus)chip.push(`<span>COUNTER +${a.counterBonus}</span>`);chip.push(`<span class="siege">CONTROL ${Math.min(futureControl,SIEGE_TARGET)}/${SIEGE_TARGET}</span>`);$('tacticalChips').innerHTML=chip.join('');
-    $('wordsPreview').innerHTML=a.allWords.length>1?`Crossfire words: <b>${a.allWords.slice(1).join(', ')}</b> (+${a.comboBonus})`:'';
+    $('wordsPreview').textContent=a.wordScores.map(w=>`${w.word}: ${w.base} letters + ${w.bonus} length = ${w.base+w.bonus}`).join(' • ');
   }
   function setStatus(msg,type){statusEl.textContent=msg;statusEl.className='status '+type;}
   function addLog(html){const d=document.createElement('div');d.className='logItem';d.innerHTML=html;logEl.prepend(d);}
 
-  $('recallBtn').addEventListener('click',recall);$('swapBtn').addEventListener('click',toggleSwap);$('passBtn').addEventListener('click',passTurn);$('submitBtn').addEventListener('click',()=>submitMove(false));$('acceptWordBtn').addEventListener('click',()=>{if(gameMode!=='online')submitMove(true);});
+  $('recallBtn').addEventListener('click',recall);$('swapBtn').addEventListener('click',toggleSwap);$('passBtn').addEventListener('click',passTurn);$('submitBtn').addEventListener('click',()=>submitMove(false));
   $('swap1').addEventListener('click',()=>performSwap('one'));$('swap3').addEventListener('click',()=>performSwap('three'));$('swapAll').addEventListener('click',()=>performSwap('all'));$('beginTurnBtn').addEventListener('click',overlayAction);$('overlaySecondaryBtn').addEventListener('click',()=>showMainMenu(true));
     const updateLaunchSettingsSummary=()=>{const t=$('launchTimer')?.selectedOptions?.[0]?.textContent||'60 sec Standard',m=$('launchMap')?.selectedOptions?.[0]?.textContent||'Frontline';const shortT=t.replace(' Standard','').replace(' Strategy','');if($('launchSettingsSummary'))$('launchSettingsSummary').textContent=`${shortT} · ${m}`;};
   $('launchTimer').addEventListener('change',updateLaunchSettingsSummary);$('launchMap').addEventListener('change',updateLaunchSettingsSummary);updateLaunchSettingsSummary();
