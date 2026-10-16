@@ -13,5 +13,18 @@
   "actualCrazyGamesCloudVerified": false,
   "formalChildSafetyCertification": false,
   "privateDeveloperRequestChannelConfigured": false,
-  "railwayDeploymentPerformed": false
+  "railwayDeploymentPerformed": false,
+  "followup": {
+    "relayDeploymentPerformed": false,
+    "databaseDependencyInRevisedSource": false,
+    "liveRelayStillLegacy": true,
+    "actualCrazyGamesPreviewBlockedBySignIn": true,
+    "testsPassed": [
+      "relay-privacy.cjs",
+      "guest-nickname.cjs",
+      "multiplayer-dom.cjs",
+      "crazygames-profile.cjs",
+      "remote-content-safety.cjs"
+    ]
+  }
 }
