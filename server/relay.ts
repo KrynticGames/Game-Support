@@ -35,9 +35,7 @@ function assignPublic(ws:any, peer:any){
 const MAX_MESSAGE_BYTES = 512_000;
 const ROOM_RE = /^[A-Z2-9]{6}$/;
 const PLAYER_RE = /^[A-Za-z0-9-]{8,96}$/;
-const ID_RE = /^[A-Za-z0-9-]{0,96}$/;
 const USER_RE = /^[A-Za-z0-9_]{3,16}$/;
-const REPORT_REASONS = new Set(["abusive_name","cheating","harassment","other"]);
 const SESSION_DAYS = 90;
 const sql = new SQL(Bun.env.DATABASE_URL!);
 
@@ -332,19 +330,8 @@ Bun.serve<SocketData>({
       return json({ok:true});
     }
 
-    if(url.pathname === "/report" && req.method === "POST"){
-      const len = Number(req.headers.get("content-length") || 0);
-      if(len > 4096) return json({ok:false,error:"too_large"},413);
-      let body:any; try{ body = await req.json(); }catch{ return json({ok:false,error:"invalid_json"},400); }
-      const room=String(body?.room||"").toUpperCase().slice(0,6);
-      const reporterId=String(body?.reporterId||"").slice(0,96);
-      const reportedId=String(body?.reportedId||"").slice(0,96);
-      const reason=String(body?.reason||"other");
-      const version=String(body?.version||"").slice(0,24);
-      if(!ROOM_RE.test(room)||!ID_RE.test(reporterId)||!ID_RE.test(reportedId)||!REPORT_REASONS.has(reason)) return json({ok:false,error:"invalid_report"},400);
-      console.log(JSON.stringify({type:"WORD_HAVOC_REPORT",at:new Date().toISOString(),room,reporterId,reportedId,reason,version}));
-      return json({ok:true});
-    }
+    // Retired: do not accept or log reports that have no moderation workflow.
+    if(url.pathname === '/report')return json({ok:false,error:'reports_unavailable'},410);
 
     if(url.pathname === '/match'){
       const playerId=String(url.searchParams.get('player')||'');

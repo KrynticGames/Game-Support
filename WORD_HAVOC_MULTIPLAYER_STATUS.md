@@ -1,15 +1,21 @@
-# Word Havoc CrazyGames status — October 15, 2026
+# Word Havoc release status — October 15, 2026
 
-Production matchmaking relay deployed successfully to lexrampart-relay (deployment c6f0eb4a-03f6-46d0-b245-b6ffaf383b89). The health endpoint reports the database healthy. Existing database SQL was preserved unchanged.
+Current CrazyGames/browser build: anonymous public matchmaking, optional CrazyGames profile names/avatars, SDK Data module progress, computer practice and local duels.
 
-The complete game and CrazyGames distribution sources were published to KrynticGames/Game-Support/main and their Git blob hashes verified against the local tested files.
+## Simplified support and data handling
 
-Passed live: two real browser game clients found each other on the production Railway relay, exchanged CAT and CATS moves, synchronized the board, disconnected/reconnected, surrendered, and rematched. Mobile search/cancel also passed. This environment's browser TLS proxy required a bridge through Node's verified TLS WebSocket transport; certificate checks were not disabled. This verifies the live relay and game protocol, not the CrazyGames hosting environment.
+- Removed developer email links from Word Havoc Privacy, Terms, Help and the shared landing page. No developer support form or report queue is offered.
+- Help directs ordinary game feedback to CrazyGames platform feedback where available. Platform account/data questions use CrazyGames privacy controls. This does not transfer developer responsibilities to the platform.
+- Retired `/report` with HTTP 410 and stopped accepting/logging new report metadata. Existing provider logs have not been erased.
+- Kept local Block & Leave with an honest current-identifier/browser limitation.
+- Removed full host-state snapshot writes; the old snapshot key is purged when opening the updated build.
+- Added confirmed Reset My Record for the current save, preserving settings and other players' stores. Reset is blocked during a live match and reports save failures.
+- Match-result overlays rebuild allowed B/BR formatting without remote attributes or active elements.
 
-The uploaded-candidate ZIP's index.html is byte-identical to the tested distribution. Guest matchmaking needs no account or room code. CrazyGames User/Data integration supplies platform names/avatars and saved player records/preferences; registered and guest profile scenarios passed SDK contract tests. The browser/local scoring regression and 100-socket local tests passed earlier.
+## Verification
 
-Still pending: sign-in to the CrazyGames developer portal, inspection of the actual uploaded draft and Progress Save selection, and real platform cloud-save verification. The earlier secure sign-in was interrupted. The game has not been submitted for public release by this agent.
-
-Required Progress Save selection: Yes, using the Data Module from the CrazyGames SDK.
-
-No unfinished-match restore, ranked leaderboard, production load certification, or CrazyGames approval is claimed.
+Browser security regression: remote win/draw/stat/log payloads cannot create active elements or event handlers.
+Local multiplayer regression: matching, scoring, invalid move rejection, reconnect, surrender/rematch, cancel, Block & Leave, 100 sockets paired into 50 rooms.
+Browser profile/save tests use a simulated CrazyGames SDK. Actual platform cloud saving still needs a CrazyGames preview check.
+Support pages tested for navigation, mobile layout, strict CSP and no email/form links.
+This is not a guarantee of zero risk, legal compliance or production capacity. The host-authoritative casual multiplayer design is not a cheat-proof competitive system. CrazyGames decides acceptance and launch eligibility. Platform email notification settings have not been changed.

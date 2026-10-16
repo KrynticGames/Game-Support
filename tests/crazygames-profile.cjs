@@ -61,6 +61,22 @@ onlineA.on('dialog',d=>d.accept());await onlineA.click('#mobileMenuBtn');await o
 assert.equal(await onlineA.locator('#recordLosses').textContent(),'1');assert.equal(await onlineB.locator('#recordWins').textContent(),'1');
 await onlineB.setViewportSize({width:390,height:844});await onlineB.screenshot({path:'/tmp/word-havoc-profile-mobile.png',fullPage:true});await onlineB.click('#overlaySecondaryBtn');await onlineB.click('#portalRecordBtn');await onlineB.screenshot({path:'/tmp/word-havoc-record-mobile.png'});
 console.log('PASS: Both portal names and avatars visible to opponents, host loss and guest win saved to correct player records');
+// Reset is explicit, scoped to the current player, and reports failed saves honestly.
+assert.equal(await a.evaluate(()=>localStorage.getItem('wordHavocOnlineHostState')),null);
+await a.click('#resetPlayerRecordBtn');
+assert.equal(await a.locator('#recordGames').textContent(),'0');
+assert.equal(await a.evaluate(()=>JSON.parse(__cgStore.wordHavocProgressV1).history.length),0);
+assert.equal(await a.evaluate(()=>JSON.parse(localStorage.getItem('wordHavocProgressV1')).total.games),999);
+assert.equal(await a.evaluate(()=>Object.hasOwn(__cgStore,'wordHavocSound')),true);
+const resetGuest=await pageFor({user:null,seed});await resetGuest.click('#portalRecordBtn');
+resetGuest.once('dialog',d=>d.dismiss());await resetGuest.click('#resetPlayerRecordBtn');assert.equal(await resetGuest.locator('#recordGames').textContent(),'22');
+resetGuest.once('dialog',d=>d.accept());await resetGuest.click('#resetPlayerRecordBtn');assert.equal(await resetGuest.locator('#recordGames').textContent(),'0');
+const resetRestored=await pageFor({user:null,seed:await resetGuest.evaluate(()=>__cgStore)});assert.equal(await resetRestored.locator('#recordGames').textContent(),'0');
+await resetGuest.click('#closePlayerRecordBtn');await resetGuest.click('#chooseCpuBtn');await resetGuest.click('#startCpuBtn');await resetGuest.waitForFunction(()=>__wh.state().matchStarted);
+await resetGuest.evaluate(()=>document.getElementById('resetPlayerRecordBtn').click());assert.match(await resetGuest.locator('#recordResetStatus').textContent(),/Finish or leave/);
+await disabled.click('#overlaySecondaryBtn');await disabled.click('#portalRecordBtn');disabled.once('dialog',d=>d.accept());await disabled.click('#resetPlayerRecordBtn');assert.match(await disabled.locator('#recordResetStatus').textContent(),/could not be saved/);
+assert.equal(await resetGuest.locator('#reportOpponentBtn').count(),0);
+console.log('PASS: record reset confirmation/cancel, account isolation, guest restored save, active-match guard, failure message and old match snapshot removal');
 assert.deepEqual(errors,[]);
 for(const context of contexts)await context.close();await browser.close();for(const socket of wss.clients)socket.terminate();wss.close();await new Promise(r=>server.close(r));process.exit(0);
 })().catch(e=>{console.error(e);process.exit(1)});

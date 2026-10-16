@@ -19,6 +19,9 @@ function make(){
 }
 const wait=async fn=>{for(let i=0;i<200;i++){if(fn())return;await new Promise(r=>setTimeout(r,25))}throw Error('Timed out '+fn.toString())};
 const click=(w,id)=>w.document.getElementById(id).click();
+const reportResponse=await handlers.fetch(new Request('http://localhost/report',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({reason:'other',reporterId:'not-stored'})}),{});
+assert.equal(reportResponse.status,410);assert.equal((await reportResponse.json()).error,'reports_unavailable');
+console.log('PASS: retired report endpoint rejects submissions without accepting a report');
 let a=make(),b=make();for(const p of[a,b]){click(p,'chooseOnlineBtn');click(p,'createOnlineBtn')}
 await wait(()=>a.__wh.state().matchStarted&&b.__wh.state().matchStarted);
 let host=a.__wh.state().onlineRole==='host'?a:b,guest=host===a?b:a;
@@ -43,6 +46,9 @@ console.log('PASS: 3 formed words scored, invalid words hide score, host rejects
 guest.__wh.stop();await wait(()=>!host.__wh.state().onlineConnected);guest.__wh.reconnect();await wait(()=>host.__wh.state().onlineConnected);
 click(host,'surrenderBtn');await wait(()=>guest.__wh.state().gameOver);click(host,'beginTurnBtn');await wait(()=>guest.document.getElementById('beginTurnBtn').textContent==='Accept Rematch');click(guest,'beginTurnBtn');await wait(()=>!host.__wh.state().gameOver&&!guest.__wh.state().gameOver);
 let c=make();click(c,'chooseOnlineBtn');click(c,'createOnlineBtn');await new Promise(r=>setTimeout(r,50));click(c,'cancelMatchBtn');assert.equal(c.document.getElementById('createOnlineBtn').disabled,false);
+click(host,'mobileMenuBtn');click(host,'mobileMenuReport');assert.equal(host.document.querySelector('#safetyOverlay').classList.contains('show'),true);assert.equal(host.document.querySelector('#reportOpponentBtn'),null);click(host,'blockOpponentBtn');assert.equal(host.__wh.state().matchStarted,false);assert.equal(JSON.parse(host.localStorage.getItem('wordHavocBlockedPlayers')).length,1);
+assert.equal(host.localStorage.getItem('wordHavocOnlineHostState'),null);
+console.log('PASS: Block & Leave stops the match and stores a local block; no report form or full match snapshot');
 assert.deepEqual(errors,[]);
 console.log('PASS: DOM clients: automatic matchmaking, CAT/CATS valid moves, board sync, disconnect/reconnect, surrender, same-room rematch, search cancellation, no JS errors');
 for(const d of doms)d.window.close();

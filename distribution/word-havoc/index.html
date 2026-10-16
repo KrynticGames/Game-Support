@@ -1905,7 +1905,7 @@ button:focus-visible,.cell:focus-visible,summary:focus-visible,a:focus-visible{o
 <div class="shell">
   <div class="header">
     <div class="brand"><span class="brandMark" aria-hidden="true">WH</span><div class="brandText"><h1>WORD HAVOC</h1></div></div>
-    <div class="modeControls"><select id="modeSelect" class="modeSelect" aria-label="Game mode"><option value="online">ONLINE 1V1</option><option value="pvp" selected>LOCAL 2 PLAYERS</option><option value="cpu">VS COMPUTER — PRACTICE</option></select><select id="difficultySelect" class="modeSelect" aria-label="Computer difficulty" style="display:none"><option value="easy">CPU — EASY</option><option value="normal" selected>CPU — NORMAL</option><option value="hard">CPU — HARD</option></select><select id="timerSelect" class="modeSelect" aria-label="Turn timer"><option value="standard" selected>TURN TIMER — 60 SEC</option><option value="blitz">BLITZ — 30 SEC</option><option value="rapid">STRATEGY — 90 SEC</option><option value="untimed">UNTIMED PRACTICE</option></select><select id="battlefieldSelect" class="modeSelect" aria-label="Battlefield"><option value="frontline" selected>MAP — FRONTLINE</option><option value="citadel">MAP — CITADEL</option><option value="crossroads">MAP — CROSSROADS</option></select><button class="miniBtn" id="helpBtn">How to Play</button><button class="miniBtn" id="settingsBtn">Settings</button><button class="miniBtn" id="onlineSafetyBtn" style="display:none">Report / Block</button><button class="miniBtn dangerMini" id="surrenderBtn">Surrender</button><button class="miniBtn" id="newGameBtn">Main Menu</button><button class="miniBtn" id="mobileMenuBtn" aria-haspopup="dialog" aria-controls="gameMenuOverlay">Menu</button></div>
+    <div class="modeControls"><select id="modeSelect" class="modeSelect" aria-label="Game mode"><option value="online">ONLINE 1V1</option><option value="pvp" selected>LOCAL 2 PLAYERS</option><option value="cpu">VS COMPUTER — PRACTICE</option></select><select id="difficultySelect" class="modeSelect" aria-label="Computer difficulty" style="display:none"><option value="easy">CPU — EASY</option><option value="normal" selected>CPU — NORMAL</option><option value="hard">CPU — HARD</option></select><select id="timerSelect" class="modeSelect" aria-label="Turn timer"><option value="standard" selected>TURN TIMER — 60 SEC</option><option value="blitz">BLITZ — 30 SEC</option><option value="rapid">STRATEGY — 90 SEC</option><option value="untimed">UNTIMED PRACTICE</option></select><select id="battlefieldSelect" class="modeSelect" aria-label="Battlefield"><option value="frontline" selected>MAP — FRONTLINE</option><option value="citadel">MAP — CITADEL</option><option value="crossroads">MAP — CROSSROADS</option></select><button class="miniBtn" id="helpBtn">How to Play</button><button class="miniBtn" id="settingsBtn">Settings</button><button class="miniBtn" id="onlineSafetyBtn" style="display:none">Block & Leave</button><button class="miniBtn dangerMini" id="surrenderBtn">Surrender</button><button class="miniBtn" id="newGameBtn">Main Menu</button><button class="miniBtn" id="mobileMenuBtn" aria-haspopup="dialog" aria-controls="gameMenuOverlay">Menu</button></div>
   </div>
   <div class="connectionBanner" id="connectionBanner" role="status">LOCAL MATCH • BUILD A CONNECTED WORD • ARMOR BLOCKS DAMAGE BEFORE HP</div>
   <div class="moveResultBar" id="moveResult" role="status" aria-live="polite" aria-atomic="true">
@@ -2095,6 +2095,8 @@ button:focus-visible,.cell:focus-visible,summary:focus-visible,a:focus-visible{o
     <div class="recordTotals"><div><b id="recordGames">0</b><span>GAMES</span></div><div><b id="recordWins">0</b><span>WINS</span></div><div><b id="recordLosses">0</b><span>LOSSES</span></div><div><b id="recordDraws">0</b><span>DRAWS</span></div></div>
     <p class="recordMode" id="recordModes"></p>
     <h3>Recent Matches</h3><ol class="recordHistory" id="recordHistory"></ol>
+    <button class="btn ghost" id="resetPlayerRecordBtn">Reset My Record</button>
+    <p class="recordSaveStatus" id="recordResetStatus" role="status"></p>
     <button class="btn primary" id="closePlayerRecordBtn">Close</button>
   </div>
 </div>
@@ -2133,7 +2135,7 @@ button:focus-visible,.cell:focus-visible,summary:focus-visible,a:focus-visible{o
     <div class="menuStack">
       <button class="btn" id="mobileMenuHelp">How to Play</button>
       <button class="btn" id="mobileMenuSettings">Settings</button>
-      <button class="btn" id="mobileMenuReport" style="display:none">Report / Block</button>
+      <button class="btn" id="mobileMenuReport" style="display:none">Block & Leave</button>
       <div class="menuDivider"></div>
       <button class="btn danger" id="mobileMenuSurrender">Surrender Match</button>
       <button class="btn ghost" id="mobileMenuMain">Return to Main Menu</button>
@@ -2145,10 +2147,7 @@ button:focus-visible,.cell:focus-visible,summary:focus-visible,a:focus-visible{o
 <div class="overlay" id="safetyOverlay">
   <div class="modal">
     <h2>Online Safety</h2>
-    <p>Word Havoc has no chat. Objectionable words are filtered. You can still report or block the opponent in an invite match.</p>
-    <label class="fieldLabel" for="reportReason">Reason</label>
-    <select class="launchInput" id="reportReason"><option value="abusive_name">Abusive or offensive name</option><option value="cheating">Suspected cheating or tampering</option><option value="harassment">Harassment outside normal gameplay</option><option value="other">Other abuse</option></select>
-    <button class="btn danger" id="reportOpponentBtn" style="width:100%;margin-top:10px">Report Opponent</button>
+    <p>No chat or private messages. The word filter can miss some spellings. Block this opponent on this device and leave the match. Blocks apply to the current player identifier, which can change.</p>
     <button class="btn danger" id="blockOpponentBtn" style="width:100%;margin-top:8px">Block Opponent & Leave Match</button>
     <button class="btn ghost" id="closeSafetyBtn" style="width:100%;margin-top:8px">Cancel</button>
   </div>
@@ -2171,6 +2170,7 @@ button:focus-visible,.cell:focus-visible,summary:focus-visible,a:focus-visible{o
 <script>
 (() => {
   'use strict';
+  try{window.localStorage.removeItem('wordHavocOnlineHostState')}catch(e){}
   const PORTAL_SAVE_KEYS=new Set(['wordHavocProgressV1','wordHavocPreferencesV1','wordHavocSound','wordHavocMotion']);
   let cgData=null,cgUser=null,cgInitPromise=null,cgSaveError=false,cgUsePortal=false;
   const pendingPortalWrites=new Map();
@@ -130396,7 +130396,6 @@ zzz`.split('\n'));
     try{
       // The guest receives only Player 2's rack. Player 1's rack and the bag order never leave the host.
       onlineConn.send(statePayload(1,result,false));
-      storage.setItem('wordHavocOnlineHostState',JSON.stringify({code:onlineCode,at:Date.now(),state:statePayload(0,result,true)}));
     }catch(e){console.warn(e);}
   }
   function applyRemoteState(m){
@@ -130560,13 +130559,6 @@ zzz`.split('\n'));
     const code=String($('joinCodeInput').value||'').toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,6);if(code.length!==6){$('launchStatus').textContent='Enter the 6-character match code.';return;}
     destroyOnline();gameMode='online';onlineRole='guest';onlinePlayerIndex=1;onlineCode=code;playerNames=['Host',accountProfile.username];playerIds=['',localPlayerId];$('launchStatus').textContent=`Connecting to ${code}…`;connectRelay('guest');
   }
-  async function reportOpponent(){
-    if(gameMode!=='online'||!matchStarted){toast('No online opponent to report.');return;}
-    const opponentIndex=1-onlinePlayerIndex,reportedId=playerIds[opponentIndex]||'';
-    const body={room:onlineCode,reporterId:localPlayerId,reportedId,reason:$('reportReason').value||'other',version:'1.0.0'};
-    try{const r=await fetch('https://word-combat-relay.up.railway.app/report',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body)});if(!r.ok)throw new Error('report failed');toast('Report submitted. Thank you.');$('safetyOverlay').classList.remove('show');}
-    catch(e){toast('Report could not be sent. Try again when online.');}
-  }
   function blockOpponent(){
     if(gameMode!=='online'||!matchStarted){$('safetyOverlay').classList.remove('show');return;}
     const id=playerIds[1-onlinePlayerIndex];if(id){blockedPlayers.add(id);storage.setItem('wordHavocBlockedPlayers',JSON.stringify([...blockedPlayers]));}
@@ -130719,6 +130711,14 @@ zzz`.split('\n'));
     const list=$('recordHistory');list.replaceChildren();
     for(const entry of [...p.history].reverse().slice(0,10)){const li=document.createElement('li'),title=document.createElement('strong');title.textContent=entry.result==='win'?'WIN':entry.result==='loss'?'LOSS':entry.result==='draw'?'DRAW':entry.mode==='pvp'?'LOCAL DUEL':'PAST MATCH';li.append(title,document.createTextNode(` · ${entry.mode==='online'?'Online':entry.mode==='cpu'?'Practice':'Local'} · ${cleanName(entry.opponent,'Opponent')} · ${new Date(entry.at).toLocaleDateString()}`));list.append(li)}
     if(!list.children.length){const li=document.createElement('li');li.textContent='Complete a match to start your record.';list.append(li)}
+  }
+  function resetPlayerRecord(){
+    if(matchStarted&&!gameOver){$('recordResetStatus').textContent='Finish or leave your current match before resetting your record.';return;}
+    if(!window.confirm('Reset your Word Havoc wins, losses and match history for the current player? This cannot be undone. Your CrazyGames account and settings will stay.'))return;
+    const ok=storage.setItem('wordHavocProgressV1',JSON.stringify(emptyProgress()));
+    if(!cgUsePortal||!cgUser){try{window.localStorage.setItem('wordHavocProgressV1',JSON.stringify(emptyProgress()));window.localStorage.removeItem('wordHavocMatchHistory')}catch(e){}}
+    renderPortalProfile();renderStats();
+    $('recordResetStatus').textContent=ok?'Your player record has been reset.':'The reset could not be saved. Try again when saving is available.';
   }
   function emptyRecord(){return {games:0,wins:0,losses:0,draws:0,bestHit:0}}
   function emptyProgress(){return {v:1,total:emptyRecord(),cpu:emptyRecord(),online:emptyRecord(),history:[]}}
@@ -131202,7 +131202,7 @@ zzz`.split('\n'));
   const syncLaunchName=(v)=>{if($('launchName1'))$('launchName1').value=String(v||'Player 1').slice(0,16);};
   $('onlineNameInput')?.addEventListener('input',e=>syncLaunchName(e.target.value));$('localName1Input')?.addEventListener('input',e=>syncLaunchName(e.target.value));$('accountLoginBtn')?.addEventListener('click',()=>accountAuth('login'));$('accountCreateBtn')?.addEventListener('click',()=>accountAuth('register'));$('accountRefreshBtn')?.addEventListener('click',()=>refreshAccount(false));$('accountLogoutBtn')?.addEventListener('click',logoutAccount);$('accountDeleteBtn')?.addEventListener('click',deleteAccount);$('accountPassword')?.addEventListener('keydown',e=>{if(e.key==='Enter')accountAuth('login')});
   const showLaunchStep=(name)=>{if($('launchOptions'))$('launchOptions').hidden=name==='online';const main=$('launchMainChoices');if(main)main.hidden=true;['Online','Cpu','Local'].forEach(key=>{const el=$(`launch${key}Panel`);if(el)el.hidden=key.toLowerCase()!==name;});if(name==='online'){if(accountProfile){$('onlineNameInput').value=accountProfile.username;syncLaunchName(accountProfile.username);}}if(name==='local'&&$('localName1Input'))$('localName1Input').value=$('launchName1').value||'Player 1';$('launchStatus').textContent='';};
-  const openPlayerRecord=()=>{renderPortalProfile();$('playerRecordOverlay').classList.add('show')};$('portalRecordBtn').addEventListener('click',openPlayerRecord);$('settingsRecordBtn').addEventListener('click',()=>{$('settingsOverlay').classList.remove('show');openPlayerRecord()});$('closePlayerRecordBtn').addEventListener('click',()=>$('playerRecordOverlay').classList.remove('show'));
+  const openPlayerRecord=()=>{renderPortalProfile();$('playerRecordOverlay').classList.add('show')};$('portalRecordBtn').addEventListener('click',openPlayerRecord);$('settingsRecordBtn').addEventListener('click',()=>{$('settingsOverlay').classList.remove('show');openPlayerRecord()});$('resetPlayerRecordBtn').addEventListener('click',resetPlayerRecord);$('closePlayerRecordBtn').addEventListener('click',()=>$('playerRecordOverlay').classList.remove('show'));
   $('chooseOnlineBtn').addEventListener('click',()=>showLaunchStep('online'));
   $('chooseCpuBtn').addEventListener('click',()=>showLaunchStep('cpu'));
   $('chooseLocalBtn').addEventListener('click',()=>showLaunchStep('local'));
@@ -131215,7 +131215,7 @@ $('startLocalBtn').addEventListener('click',async()=>{initAudio();await initCraz
   const openHelp=()=>{$('helpOverlay').classList.add('show')};const openSettings=()=>{$('soundToggle').checked=soundEnabled;$('motionToggle').checked=reducedMotion;$('settingsOverlay').classList.add('show')};$('helpBtn').addEventListener('click',openHelp);$('launchHelpBtn').addEventListener('click',openHelp);$('closeHelpBtn').addEventListener('click',()=>$('helpOverlay').classList.remove('show'));
   $('settingsBtn').addEventListener('click',openSettings);$('closeSettingsBtn').addEventListener('click',()=>$('settingsOverlay').classList.remove('show'));$('soundToggle').addEventListener('change',e=>{soundEnabled=e.target.checked;storage.setItem('wordHavocSound',soundEnabled?'on':'off');if(soundEnabled)sfx('armor')});$('motionToggle').addEventListener('change',e=>{reducedMotion=e.target.checked;document.body.classList.toggle('reducedMotion',reducedMotion);storage.setItem('wordHavocMotion',reducedMotion?'reduced':'full')});
   const closeGameMenu=()=>$('gameMenuOverlay').classList.remove('show');$('mobileMenuBtn').addEventListener('click',()=>{$('mobileMenuReport').style.display=(gameMode==='online'&&matchStarted)?'flex':'none';$('gameMenuOverlay').classList.add('show')});$('mobileMenuClose').addEventListener('click',closeGameMenu);$('mobileMenuHelp').addEventListener('click',()=>{closeGameMenu();openHelp()});$('mobileMenuSettings').addEventListener('click',()=>{closeGameMenu();openSettings()});$('mobileMenuReport').addEventListener('click',()=>{closeGameMenu();if(gameMode==='online'&&matchStarted)$('safetyOverlay').classList.add('show')});$('mobileMenuSurrender').addEventListener('click',()=>{closeGameMenu();surrenderMatch()});$('mobileMenuMain').addEventListener('click',()=>{closeGameMenu();showMainMenu()});
-  $('onlineSafetyBtn').addEventListener('click',()=>{if(gameMode==='online'&&matchStarted)$('safetyOverlay').classList.add('show')});$('closeSafetyBtn').addEventListener('click',()=>$('safetyOverlay').classList.remove('show'));$('reportOpponentBtn').addEventListener('click',reportOpponent);$('blockOpponentBtn').addEventListener('click',blockOpponent);
+  $('onlineSafetyBtn').addEventListener('click',()=>{if(gameMode==='online'&&matchStarted)$('safetyOverlay').classList.add('show')});$('closeSafetyBtn').addEventListener('click',()=>$('safetyOverlay').classList.remove('show'));$('blockOpponentBtn').addEventListener('click',blockOpponent);
   $('surrenderBtn').addEventListener('click',surrenderMatch);$('newGameBtn').addEventListener('click',()=>showMainMenu());
   $('modeSelect').addEventListener('change',e=>{showMainMenu();}); $('difficultySelect').addEventListener('change',e=>{cpuDifficulty=['easy','normal','hard'].includes(e.target.value)?e.target.value:'normal';if(gameMode==='cpu'&&confirm('Restart practice with this difficulty?'))newGame();}); $('timerSelect').addEventListener('change',e=>{const next=TIMER_PRESETS[e.target.value]!==undefined?e.target.value:'standard';if(matchStarted&&!gameOver&&!confirm('Changing the timer starts a new match. Continue?')){e.target.value=timerPreset;return;}timerPreset=next;if(gameMode!=='online')newGame();}); $('battlefieldSelect').addEventListener('change',e=>{const next=BATTLEFIELDS[e.target.value]?e.target.value:'frontline';if(matchStarted&&!gameOver&&!confirm('Changing the battlefield starts a new match. Continue?')){e.target.value=battlefieldPreset;return;}applyBattlefieldPreset(next);if(gameMode!=='online')newGame();});
   clockHandle=setInterval(()=>{syncClock();renderClocks();},200);
