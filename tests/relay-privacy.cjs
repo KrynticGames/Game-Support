@@ -3,9 +3,9 @@ const fs=require('fs'),assert=require('assert'),{stripTypeScriptTypes}=require('
  const source=fs.readFileSync('server/relay.ts','utf8');
  assert(!/\bSQL\b|DATABASE_URL|Bun\.password|console\.|writeFile/.test(source));
  let h,tick,now=Date.now();const realNow=Date.now;Date.now=()=>now;
- const fakeInterval=fn=>{tick=fn;return {unref(){}}};
+ const fakeTimeout=(fn,ms)=>{if(ms===15*60000)tick=fn;return {unref(){}}};
  const fakeBun={env:{},serve:opts=>h=opts};
- new Function('Bun','setInterval',stripTypeScriptTypes(source))(fakeBun,fakeInterval);
+ new Function('Bun','setTimeout','clearTimeout',stripTypeScriptTypes(source))(fakeBun,fakeTimeout,()=>{});
  for(const path of ['/auth/register','/auth/login','/auth/me','/auth/delete','/stats/match','/activity/events','/activity/summary','/report']){
   const req=new Request('http://localhost'+path,{method:'POST',body:'private data must not be read'});
   const r=await h.fetch(req,{});assert.equal(r.status,410,path);assert.equal(req.bodyUsed,false,path);

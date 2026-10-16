@@ -15,6 +15,7 @@ type Room = {
   publicMatch?: boolean;
   disconnectedAt?: number;
   touched: number;
+  expiryTimer?: ReturnType<typeof setTimeout>;
 };
 
 const rooms = new Map<string, Room>();
@@ -23,7 +24,7 @@ function assignPublic(ws:any, peer:any){
   const chars='ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; let code='';
   do{code=Array.from(crypto.getRandomValues(new Uint8Array(6)),n=>chars[n%chars.length]).join('');}while(rooms.has(code));
   const r:Room={host:peer,guest:ws,hostPlayerId:peer.data.playerId,guestPlayerId:ws.data.playerId,publicMatch:true,touched:Date.now()};
-  rooms.set(code,r);
+  rooms.set(code,r);touchRoom(code,r);
   for(const [socket,role] of [[peer,'host'],[ws,'guest']] as const){socket.data.room=code;socket.data.role=role;socket.data.queued=false;socket.data.publicMatch=true;send(socket,{type:'matched',role,room:code});}
 }
 const MAX_MESSAGE_BYTES = 512_000;
@@ -34,7 +35,7 @@ function other(room:Room, role:Role){ return role === "host" ? room.guest : room
 function otherPlayerId(room:Room, role:Role){ return role === "host" ? room.guestPlayerId : room.hostPlayerId; }
 function cleanupRoom(code:string){
   const r=rooms.get(code); if(!r) return;
-  if(!r.host && !r.guest) rooms.delete(code);
+  if(!r.host && !r.guest){clearTimeout(r.expiryTimer);rooms.delete(code);}
 }
 function json(value:any,status=200){
   return Response.json(value,{status,headers:corsHeaders});
@@ -49,13 +50,15 @@ const corsHeaders = {
 // Match routing exists only in process memory. No database, filesystem writes,
 // analytics, account profiles, request-body logging or stored match history.
 const ROOM_IDLE_MS = 15 * 60_000;
-setInterval(() => {
-  const now=Date.now();
-  for(const [code,r] of rooms) if(now-r.touched>ROOM_IDLE_MS){
+function touchRoom(code:string,r:Room){
+  r.touched=Date.now();clearTimeout(r.expiryTimer);
+  r.expiryTimer=setTimeout(()=>{
+    if(rooms.get(code)!==r)return;
     rooms.delete(code);
-    for(const socket of [r.host,r.guest]) if(socket) socket.close(4004,'Match expired');
-  }
-},60_000).unref();
+    for(const socket of [r.host,r.guest])if(socket)socket.close(4004,'Match expired');
+  },ROOM_IDLE_MS);
+  r.expiryTimer.unref?.();
+}
 
 Bun.serve<SocketData>({
   port: Number(Bun.env.PORT || 3000),
@@ -128,7 +131,7 @@ Bun.serve<SocketData>({
       }
       r.disconnectedAt=undefined;
       ws.data.publicMatch=!!r.publicMatch;
-      r.touched=Date.now();
+      touchRoom(room,r);
       send(ws,{type:"relayReady",role,room,peerPlayerId:otherPlayerId(r,role)||""});
       const peer=other(r,role);
       if(peer) send(peer,{type:"relayPeerConnected",role,playerId});
@@ -155,7 +158,7 @@ Bun.serve<SocketData>({
         if(!allowed.includes(parsed.type))return;
         if(parsed.type==='join')parsed.playerId=ws.data.playerId;
       }
-      r.touched=Date.now();
+      touchRoom(room,r);
       send(peer,parsed);
     },
     close(ws){
@@ -165,11 +168,11 @@ Bun.serve<SocketData>({
       if(role==="host" && r.host===ws) r.host=undefined;
       if(role==="guest" && r.guest===ws) r.guest=undefined;
       if((role==='host'&&r.host)||(role==='guest'&&r.guest))return;
-      r.touched=Date.now();
+      touchRoom(room,r);
       const peer=other(r,role);
       if(peer) send(peer,{type:"relayPeerClosed",role});
       const disconnectedAt=Date.now();r.disconnectedAt=disconnectedAt;
-      setTimeout(()=>{const current=rooms.get(room);if(current===r&&r.disconnectedAt===disconnectedAt&&(!r.host||!r.guest)){for(const socket of [r.host,r.guest])if(socket){send(socket,{type:'matchExpired'});socket.close(4004,'Opponent left');}rooms.delete(room);}},61000);
+      setTimeout(()=>{const current=rooms.get(room);if(current===r&&r.disconnectedAt===disconnectedAt&&(!r.host||!r.guest)){clearTimeout(r.expiryTimer);for(const socket of [r.host,r.guest])if(socket){send(socket,{type:'matchExpired'});socket.close(4004,'Opponent left');}rooms.delete(room);}},61000);
       cleanupRoom(room);
     }
   }

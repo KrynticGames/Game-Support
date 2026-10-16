@@ -15,9 +15,9 @@
   "privateDeveloperRequestChannelConfigured": false,
   "railwayDeploymentPerformed": false,
   "followup": {
-    "relayDeploymentPerformed": false,
+    "relayDeploymentPerformed": true,
     "databaseDependencyInRevisedSource": false,
-    "liveRelayStillLegacy": true,
+    "liveRelayStillLegacy": false,
     "actualCrazyGamesPreviewBlockedBySignIn": true,
     "testsPassed": [
       "relay-privacy.cjs",
@@ -25,6 +25,16 @@
       "multiplayer-dom.cjs",
       "crazygames-profile.cjs",
       "remote-content-safety.cjs"
-    ]
+    ],
+    "liveDeploymentId": "b23331e1-f838-4e6c-8ee5-c037185d1a31",
+    "liveHealthVerified": true,
+    "legacyEndpointsReturn410": true,
+    "liveMultiplayerTestPassed": true,
+    "billingObserved": {
+      "plan": "Trial",
+      "currentBillUSD": 0,
+      "remainingCreditUSD": 4.72,
+      "paidUpgradePerformed": false
+    }
   }
 }
