@@ -6,6 +6,8 @@ type SocketData = {
   role: Role;
   playerId: string;
   connectedAt: number;
+  queued?: boolean;
+  publicMatch?: boolean;
   accountId?: string;
   accountUsername?: string;
 };
@@ -16,10 +18,20 @@ type Room = {
   guestPlayerId?: string;
   hostAccountId?: string;
   guestAccountId?: string;
+  publicMatch?: boolean;
+  disconnectedAt?: number;
   touched: number;
 };
 
 const rooms = new Map<string, Room>();
+const waiting = new Set<any>();
+function assignPublic(ws:any, peer:any){
+  const chars='ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; let code='';
+  do{code=Array.from(crypto.getRandomValues(new Uint8Array(6)),n=>chars[n%chars.length]).join('');}while(rooms.has(code));
+  const r:Room={host:peer,guest:ws,hostPlayerId:peer.data.playerId,guestPlayerId:ws.data.playerId,publicMatch:true,touched:Date.now()};
+  rooms.set(code,r);
+  for(const [socket,role] of [[peer,'host'],[ws,'guest']] as const){socket.data.room=code;socket.data.role=role;socket.data.queued=false;socket.data.publicMatch=true;send(socket,{type:'matched',role,room:code});}
+}
 const MAX_MESSAGE_BYTES = 512_000;
 const ROOM_RE = /^[A-Z2-9]{6}$/;
 const PLAYER_RE = /^[A-Za-z0-9-]{8,96}$/;
@@ -334,6 +346,13 @@ Bun.serve<SocketData>({
       return json({ok:true});
     }
 
+    if(url.pathname === '/match'){
+      const playerId=String(url.searchParams.get('player')||'');
+      if(!PLAYER_RE.test(playerId))return new Response('Invalid player',{status:400});
+      if(waiting.size>=1000)return new Response('Queue busy',{status:503});
+      const ok=srv.upgrade(req,{data:{room:'',role:'host',playerId,queued:true,connectedAt:Date.now()}});
+      return ok?undefined:new Response('Upgrade failed',{status:400});
+    }
     if(url.pathname !== "/ws") return new Response("Word Havoc relay", {status:200,headers:{"cache-control":"no-store"}});
     const room = (url.searchParams.get("room") || "").toUpperCase();
     const role = url.searchParams.get("role") as Role;
@@ -348,6 +367,14 @@ Bun.serve<SocketData>({
     maxPayloadLength: MAX_MESSAGE_BYTES,
     idleTimeout: 180,
     open(ws){
+      if(ws.data.queued){
+        for(const candidate of waiting){
+          if(candidate.readyState!==1){waiting.delete(candidate);continue;}
+          if(candidate.data.playerId===ws.data.playerId)continue;
+          waiting.delete(candidate);assignPublic(ws,candidate);return;
+        }
+        waiting.add(ws);send(ws,{type:'queued'});return;
+      }
       const {room,role,playerId}=ws.data;
       let r=rooms.get(room);
       if(!r){r={touched:Date.now()};rooms.set(room,r);}
@@ -367,12 +394,18 @@ Bun.serve<SocketData>({
         }
         r.guest=ws; r.guestPlayerId=playerId;
       }
+      r.disconnectedAt=undefined;
+      ws.data.publicMatch=!!r.publicMatch;
       r.touched=Date.now();
       send(ws,{type:"relayReady",role,room,peerPlayerId:otherPlayerId(r,role)||""});
       const peer=other(r,role);
       if(peer) send(peer,{type:"relayPeerConnected",role,playerId});
     },
     async message(ws,message){
+      if(ws.data.queued){
+        if(String(message).includes('heartbeat'))send(ws,{type:'heartbeatAck'});
+        return;
+      }
       const {room,role}=ws.data;
       const r=rooms.get(room); if(!r) return;
       r.touched=Date.now();
@@ -396,19 +429,28 @@ Bun.serve<SocketData>({
         return;
       }
 
-      if(!ws.data.accountId){ send(ws,{type:"authError"}); return; }
+      if(!ws.data.accountId&&!ws.data.publicMatch){ send(ws,{type:"authError"}); return; }
       const peer=other(r,role);
       if(!peer){ send(ws,{type:"relayWaiting"}); return; }
+      if(ws.data.publicMatch){
+        const allowed=role==='host'?['welcome','state','rematchRequest','rematchAccept','blocked']:['join','action','rematchRequest','rematchAccept','blocked'];
+        if(!allowed.includes(parsed.type))return;
+        if(parsed.type==='join')parsed.playerId=ws.data.playerId;
+      }
       send(peer,parsed);
     },
     close(ws){
+      waiting.delete(ws);
       const {room,role}=ws.data;
       const r=rooms.get(room); if(!r) return;
       if(role==="host" && r.host===ws) r.host=undefined;
       if(role==="guest" && r.guest===ws) r.guest=undefined;
+      if((role==='host'&&r.host)||(role==='guest'&&r.guest))return;
       r.touched=Date.now();
       const peer=other(r,role);
       if(peer) send(peer,{type:"relayPeerClosed",role});
+      const disconnectedAt=Date.now();r.disconnectedAt=disconnectedAt;
+      setTimeout(()=>{const current=rooms.get(room);if(current===r&&r.disconnectedAt===disconnectedAt&&(!r.host||!r.guest)){for(const socket of [r.host,r.guest])if(socket){send(socket,{type:'matchExpired'});socket.close(4004,'Opponent left');}rooms.delete(room);}},61000);
       cleanupRoom(room);
     }
   }
