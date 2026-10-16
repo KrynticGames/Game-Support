@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <meta name="description" content="Word Havoc is a tactical word battle game where words deal damage, Armor blocks attacks, and special board spaces can heal, defend, or amplify a strike." />
 <meta name="theme-color" content="#0e1013" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'self' data: blob:; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://word-combat-relay.up.railway.app wss://word-combat-relay.up.railway.app; object-src 'none'; base-uri 'self'; form-action 'none'; worker-src 'self' blob:" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' data: blob:; script-src 'self' 'unsafe-inline' https://sdk.crazygames.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://images.crazygames.com; connect-src 'self' https://*.crazygames.com https://*.crazygames.io https://word-combat-relay.up.railway.app wss://word-combat-relay.up.railway.app; frame-src 'self' https://*.crazygames.com https://*.crazygames.io; object-src 'none'; base-uri 'self'; form-action 'none'; worker-src 'self' blob:" />
 <meta name="application-name" content="Word Havoc" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
@@ -1893,10 +1893,13 @@ button:focus-visible,.cell:focus-visible,summary:focus-visible,a:focus-visible{o
 @media(prefers-reduced-motion:reduce){#startOverlay .simpleMode{transition:none!important}#startOverlay .simpleMode:hover{transform:none!important}}
 
 
-/* Browser portal launch: no external account or online-login registration is offered. */
-/* Online Duel restored: supports multiplayer room codes. */
+.portalIdentity{display:flex;align-items:center;gap:9px;margin:8px 0 12px;color:#dfd1b4;font-size:12px;min-height:30px}
+.portalIdentity>span{overflow-wrap:anywhere;flex:1}.portalIdentity>img{width:28px;height:28px;border-radius:50%;object-fit:cover}.portalIdentity .textBtn{padding:5px;font-size:11px;white-space:nowrap}
+.playerIdentity{display:flex;align-items:center;gap:7px;min-width:0;max-width:70%}.playerIdentity .playerName{min-width:0;overflow-wrap:anywhere;text-transform:none}.playerAvatar{width:26px;height:26px;object-fit:cover;border-radius:50%;flex-shrink:0}
+#playerRecordOverlay{z-index:1100}.recordModal{max-height:calc(100dvh - 40px);overflow:auto}.recordOwner{font-size:16px;color:#f0d38c;margin:0 0 12px;overflow-wrap:anywhere}.recordHistory{text-align:left}.recordSaveStatus{font-size:12px;line-height:1.5;color:#b5c7d8}.recordTotals{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin:16px 0}.recordTotals>div{padding:12px 4px;background:#101c26;border:1px solid #405064;border-radius:9px;text-align:center}.recordTotals b{display:block;font-size:25px;color:#f3d38a}.recordTotals span{font-size:9px;color:#b9c8d5}.recordMode{font-size:12px;color:#bac9d8;line-height:1.6}.recordHistory{padding:0;list-style:none;max-height:230px;overflow:auto}.recordHistory li{padding:10px 0;border-bottom:1px solid #344351;font-size:12px;line-height:1.5;color:#cdd7e0}.recordHistory strong{color:#f0d38c}.recordModal h3{font-size:13px;color:#f0d38c}.recordModal>.btn{width:100%}
+@media(max-width:600px){.playerAvatar{width:18px;height:18px}.playerIdentity{gap:4px;max-width:100%}.playerIdentity .playerName{font-size:9px!important;letter-spacing:.02em!important}.portalIdentity{margin:7px 0 10px}}
 </style>
-
+<script src="https://sdk.crazygames.com/crazygames-sdk-v3.js" async></script>
 </head>
 <body>
 <div class="shell">
@@ -1918,14 +1921,14 @@ button:focus-visible,.cell:focus-visible,summary:focus-visible,a:focus-visible{o
 
   <div class="scorebar">
     <div class="playerCard p1 active" id="p1card">
-      <div class="playerTop"><div class="playerName" id="p1Name">PLAYER 1</div><div class="hp"><span id="hp1">100</span><small>HP</small></div></div>
+      <div class="playerTop"><div class="playerIdentity"><img class="playerAvatar" id="p1Avatar" alt="" hidden><div class="playerName" id="p1Name">PLAYER 1</div></div><div class="hp"><span id="hp1">100</span><small>HP</small></div></div>
       <div class="hpTrack"><div class="hpFill" id="hpbar1"></div></div>
       <div class="duelMeta"><span class="clock" id="clock1">1:00</span><span class="armorMeter" id="armor1">ARMOR 0</span><span class="siegeMeter" id="siege1">CONTROL 0/8</span></div>
       <div class="lastAttackReadout" id="lastAttack1"><span>LAST HIT</span><b>—</b><em>NO ATTACK YET</em></div>
     </div>
     <div class="turnBadge"><b id="turnLabel">P1 TURN</b><span class="turnClockCaption">TURN TIMER</span><strong class="activeTurnClock" id="activeClock">1:00</strong><span id="bagCount">Bag: —</span></div>
     <div class="playerCard p2" id="p2card">
-      <div class="playerTop"><div class="playerName" id="p2Name">PLAYER 2</div><div class="hp"><span id="hp2">100</span><small>HP</small></div></div>
+      <div class="playerTop"><div class="playerIdentity"><img class="playerAvatar" id="p2Avatar" alt="" hidden><div class="playerName" id="p2Name">PLAYER 2</div></div><div class="hp"><span id="hp2">100</span><small>HP</small></div></div>
       <div class="hpTrack"><div class="hpFill" id="hpbar2"></div></div>
       <div class="duelMeta"><span class="clock" id="clock2">1:00</span><span class="armorMeter" id="armor2">ARMOR 0</span><span class="siegeMeter" id="siege2">CONTROL 0/8</span></div>
       <div class="lastAttackReadout" id="lastAttack2"><span>LAST HIT</span><b>—</b><em>NO ATTACK YET</em></div>
@@ -1990,7 +1993,7 @@ button:focus-visible,.cell:focus-visible,summary:focus-visible,a:focus-visible{o
           <div class="stat"><span>Counterstrikes</span><b id="statCounters">0</b></div>
           <div class="stat"><span>Timeouts</span><b id="statTimeouts">0</b></div>
         </div>
-        <div class="balanceLine" id="balanceLine">Complete matches to build balance data on this device.</div>
+        <div class="balanceLine" id="balanceLine">Complete matches to build your player record.</div>
       </div>
       <div class="card">
         <h3>Battle Log</h3>
@@ -2017,11 +2020,12 @@ button:focus-visible,.cell:focus-visible,summary:focus-visible,a:focus-visible{o
       <div class="menuHeroShade"></div>
       <div class="menuHeroWords"><b>ATTACK • ARMOR • CONTROL</b></div>
     </div>
+    <div class="portalIdentity"><img id="portalAvatar" alt="" hidden><span id="portalName">Guest player</span><button class="textBtn" id="portalRecordBtn">Player Record</button></div>
     <input type="hidden" id="launchName1" value="Player 1">
 
     <div class="launchMain" id="launchMainChoices">
       <button class="simpleMode quickMode recommendedMode" id="chooseCpuBtn"><span class="modeBadge">PLAY</span><span class="modeCopy"><b>QUICK BATTLE</b><em>Start a solo battle now</em></span><span class="modeArrow">›</span></button>
-      <button class="simpleMode onlineMode" id="chooseOnlineBtn"><span class="modeBadge">1V1</span><span class="modeCopy"><b>ONLINE DUEL</b><em>Fight online with a room code</em></span><span class="modeArrow">›</span></button>
+      <button class="simpleMode onlineMode" id="chooseOnlineBtn"><span class="modeBadge">1V1</span><span class="modeCopy"><b>ONLINE DUEL</b><em>Find an opponent • no sign-in</em></span><span class="modeArrow">›</span></button>
       <button class="simpleMode" id="chooseLocalBtn"><span class="modeBadge">2P</span><span class="modeCopy"><b>LOCAL DUEL</b><em>Play locally on one device</em></span><span class="modeArrow">›</span></button>
       <div class="firstSessionNote">Use words to attack, build armor, and take the board.</div>
     </div>
@@ -2029,7 +2033,7 @@ button:focus-visible,.cell:focus-visible,summary:focus-visible,a:focus-visible{o
     <section class="launchPanel" id="launchOnlinePanel" hidden>
       <button class="backLink" type="button" data-launch-back>‹ Back</button>
       <h2>Online Duel</h2>
-      <div class="accountBox" id="accountBox">
+      <div class="accountBox" id="accountBox" hidden style="display:none">
         <div class="accountAuth">
           <h3>Word Havoc Account</h3>
           <p class="accountLead">Create an account or sign in to play online and keep your record across devices.</p>
@@ -2046,11 +2050,11 @@ button:focus-visible,.cell:focus-visible,summary:focus-visible,a:focus-visible{o
         </div>
       </div>
       <input type="hidden" id="onlineNameInput" value="Player 1">
-      <div class="onlineAccountRequired">Online matches are account-based so wins and losses stay with your profile.</div>
-      <button class="simpleMode onlineMode panelPlayBtn" id="createOnlineBtn"><span class="modeBadge">NEW</span><span class="modeCopy"><b>CREATE MATCH</b><em>Get a 6-character invite code</em></span></button>
-      <div class="simpleJoinRow"><input class="launchInput codeInput" id="joinCodeInput" maxlength="6" placeholder="MATCH CODE" autocomplete="off" aria-label="Match code"><button class="btn primary" id="joinOnlineBtn">JOIN</button></div>
+      <div class="onlineAccountRequired">Find a real opponent automatically. No account or room code needed.</div>
+      <button class="simpleMode onlineMode panelPlayBtn" id="createOnlineBtn"><span class="modeBadge">1V1</span><span class="modeCopy"><b>FIND MATCH</b><em>Play a real opponent online</em></span></button>
+      <div class="simpleJoinRow" style="display:none"><input class="launchInput codeInput" id="joinCodeInput" maxlength="6" placeholder="MATCH CODE" autocomplete="off" aria-label="Match code"><button class="btn primary" id="joinOnlineBtn">JOIN</button></div>
       <button class="btn shareInvite" id="shareInviteBtn">Share Match Invite</button>
-      <label class="onlineConsent"><input type="checkbox" id="onlineTermsCheck"> <span>I agree to the <a href="https://lexrampart-site-production.up.railway.app/terms" target="_blank" rel="noopener">Terms</a> and fair-play rules.</span></label>
+      <button class="btn ghost" id="cancelMatchBtn" hidden>Cancel Search</button><p class="panelLead" style="margin:16px 0 0;line-height:1.5">60-second turns · Frontline battlefield</p><label class="onlineConsent" style="display:none"><input type="checkbox" id="onlineTermsCheck"> <span>I agree to the <a href="https://lexrampart-site-production.up.railway.app/terms" target="_blank" rel="noopener">Terms</a> and fair-play rules.</span></label>
     </section>
     <section class="launchPanel" id="launchCpuPanel" hidden>
       <button class="backLink" type="button" data-launch-back>‹ Back</button>
@@ -2080,10 +2084,20 @@ button:focus-visible,.cell:focus-visible,summary:focus-visible,a:focus-visible{o
     </details>
 
     <div class="lobbyStatus compactLobby" id="launchStatus"></div>
-    <div class="simpleFooter"><button class="textBtn" id="launchHelpBtn">How to Play</button><div class="legalLinks"><a href="https://krynticgames.github.io/Game-Support/word-havoc-privacy.html" target="_blank" rel="noopener">Privacy</a><a href="https://krynticgames.github.io/Game-Support/word-havoc-support.html" target="_blank" rel="noopener">Support</a><a href="https://lexrampart-site-production.up.railway.app/terms" target="_blank" rel="noopener">Terms</a></div></div>
+    <div class="simpleFooter"><button class="textBtn" id="launchHelpBtn">How to Play</button><div class="legalLinks"><a href="https://krynticgames.github.io/Game-Support/word-havoc-privacy.html" target="_blank" rel="noopener">Privacy</a><a href="https://lexrampart-site-production.up.railway.app/support" target="_blank" rel="noopener">Support</a><a href="https://lexrampart-site-production.up.railway.app/terms" target="_blank" rel="noopener">Terms</a></div></div>
   </div>
 </div>
 
+<div class="overlay" id="playerRecordOverlay" role="dialog" aria-modal="true" aria-labelledby="playerRecordTitle">
+  <div class="modal recordModal">
+    <h2 id="playerRecordTitle">Player Record</h2><div class="recordOwner" id="recordOwner"></div>
+    <p class="recordSaveStatus" id="recordSaveStatus" role="status">Saved on this browser.</p>
+    <div class="recordTotals"><div><b id="recordGames">0</b><span>GAMES</span></div><div><b id="recordWins">0</b><span>WINS</span></div><div><b id="recordLosses">0</b><span>LOSSES</span></div><div><b id="recordDraws">0</b><span>DRAWS</span></div></div>
+    <p class="recordMode" id="recordModes"></p>
+    <h3>Recent Matches</h3><ol class="recordHistory" id="recordHistory"></ol>
+    <button class="btn primary" id="closePlayerRecordBtn">Close</button>
+  </div>
+</div>
 <div class="overlay" id="helpOverlay">
   <div class="modal wideModal">
     <h2>How to Play Word Havoc</h2>
@@ -2101,13 +2115,13 @@ button:focus-visible,.cell:focus-visible,summary:focus-visible,a:focus-visible{o
 
 <div class="overlay" id="settingsOverlay">
   <div class="modal">
-    <h2>Settings</h2>
+    <h2>Settings</h2><button class="btn ghost" id="settingsRecordBtn" style="margin-bottom:12px">Player Record</button>
     <div class="settingsRows">
       <label><span>Subtle sound effects</span><input type="checkbox" id="soundToggle"></label>
       <label><span>Reduced motion</span><input type="checkbox" id="motionToggle"></label>
     </div>
-    <div class="legalLinks" style="justify-content:center;margin:0 0 14px"><a href="https://krynticgames.github.io/Game-Support/word-havoc-privacy.html" target="_blank" rel="noopener">Privacy Policy</a><a href="https://krynticgames.github.io/Game-Support/word-havoc-support.html" target="_blank" rel="noopener">Support</a><a href="https://lexrampart-site-production.up.railway.app/terms" target="_blank" rel="noopener">Terms</a></div>
-    <div class="nativeBadge">Word Havoc 1.0.0 • Friend matches are unranked.</div>
+    <div class="legalLinks" style="justify-content:center;margin:0 0 14px"><a href="https://krynticgames.github.io/Game-Support/word-havoc-privacy.html" target="_blank" rel="noopener">Privacy Policy</a><a href="https://lexrampart-site-production.up.railway.app/support" target="_blank" rel="noopener">Support</a><a href="https://lexrampart-site-production.up.railway.app/terms" target="_blank" rel="noopener">Terms</a></div>
+    <div class="nativeBadge">Word Havoc 1.0.0 • Online duels are unranked.</div>
     <button class="btn primary" id="closeSettingsBtn">Close</button>
   </div>
 </div>
@@ -2151,13 +2165,51 @@ button:focus-visible,.cell:focus-visible,summary:focus-visible,a:focus-visible{o
 </div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
+<script>
 
+</script>
 <script>
 (() => {
   'use strict';
-  const storage={getItem(k){try{return window.localStorage.getItem(k)}catch(e){return null}},setItem(k,v){try{window.localStorage.setItem(k,v)}catch(e){}}};
+  const PORTAL_SAVE_KEYS=new Set(['wordHavocProgressV1','wordHavocPreferencesV1','wordHavocSound','wordHavocMotion']);
+  let cgData=null,cgUser=null,cgInitPromise=null,cgSaveError=false,cgUsePortal=false;
+  const pendingPortalWrites=new Map();
+  const localStorageSafe={getItem(k){try{return window.localStorage.getItem(k)}catch(e){return null}},setItem(k,v){try{window.localStorage.setItem(k,v);return true}catch(e){return false}}};
+  const storage={
+    getItem(k){if(cgUsePortal&&PORTAL_SAVE_KEYS.has(k)){if(pendingPortalWrites.has(k))return pendingPortalWrites.get(k);try{return cgData?cgData.getItem(k):null}catch(e){cgSaveError=true;return null}}return localStorageSafe.getItem(k)},
+    setItem(k,v){if(cgUsePortal&&PORTAL_SAVE_KEYS.has(k)){pendingPortalWrites.set(k,String(v));try{if(!cgData)throw Error('Save unavailable');cgData.setItem(k,String(v));pendingPortalWrites.delete(k);cgSaveError=pendingPortalWrites.size>0;return true}catch(e){cgSaveError=true;renderPortalProfile();return false}}return localStorageSafe.setItem(k,v)}
+  };
   function nativeHaptic(kind='light'){try{const hp=window.Capacitor?.Plugins?.Haptics;if(hp?.impact){const style=kind==='heavy'?'HEAVY':kind==='medium'?'MEDIUM':'LIGHT';hp.impact({style});return;}if(window.NativeBridge&&typeof window.NativeBridge.haptic==='function'){window.NativeBridge.haptic(kind);return;}if(navigator.vibrate){navigator.vibrate(kind==='heavy'?35:kind==='medium'?22:12);}}catch(e){}}
   async function shareText(text){try{const sh=window.Capacitor?.Plugins?.Share;if(sh?.share){await sh.share({title:'Word Havoc',text:String(text),dialogTitle:'Invite to Word Havoc'});return true;}if(window.NativeBridge&&typeof window.NativeBridge.shareText==='function'){window.NativeBridge.shareText(String(text));return true;}if(navigator.share){await navigator.share({title:'Word Havoc',text:String(text)});return true;}}catch(e){}return false;}
+  let cgReady=false,cgPlaying=false,cgMuted=false;
+  function initCrazyGames(){
+    const sdk=window.CrazyGames?.SDK;if(!sdk)return Promise.resolve();
+    if(cgInitPromise)return cgInitPromise;cgUsePortal=true;
+    cgInitPromise=(async()=>{
+      try{
+        await sdk.init();cgReady=true;let userKnown=!sdk.user?.isUserAccountAvailable;
+        if(sdk.user?.isUserAccountAvailable){try{cgUser=await sdk.user.getUser();userKnown=true}catch(e){cgUser=null}}
+        if(sdk.data&&typeof sdk.data.getItem==='function'&&typeof sdk.data.setItem==='function'){
+          cgData=sdk.data;
+          try{
+            cgData.getItem('wordHavocProgressV1');
+            // Only import legacy browser saves into the guest store once. Never seed a signed-in
+            // account from another person's browser-local progress; the SDK owns guest-to-account transfer.
+            if(userKnown&&!cgUser&&localStorageSafe.getItem('wordHavocPortalGuestMigrationV1')!=='done'){
+              for(const key of PORTAL_SAVE_KEYS){if(cgData.getItem(key)===null){const old=localStorageSafe.getItem(key);if(old!==null)cgData.setItem(key,old)}}
+              localStorageSafe.setItem('wordHavocPortalGuestMigrationV1','done');
+            }
+          }catch(e){cgSaveError=true}
+        }else cgSaveError=true;
+        const settings=x=>{cgMuted=!!x?.muteAudio;if(cgMuted)audioCtx?.suspend();else if(soundEnabled)audioCtx?.resume();};
+        settings(sdk.game.settings);sdk.game.addSettingsChangeListener?.(settings);cgGameplay(matchStarted&&!gameOver);
+        sdk.user?.addAuthListener?.(user=>{pendingPortalWrites.clear();cgUser=user||null;cgSaveError=false;loadSavedPreferences();applyPortalIdentity();renderPortalProfile();renderStats()});
+        loadSavedPreferences();applyPortalIdentity();renderPortalProfile();renderStats();
+      }catch(e){cgSaveError=true;renderPortalProfile()}
+    })();return cgInitPromise;
+  }
+  window.addEventListener('load',initCrazyGames,{once:true});
+  function cgGameplay(playing){if(!cgReady||cgPlaying===playing)return;cgPlaying=playing;try{window.CrazyGames.SDK.game[playing?'gameplayStart':'gameplayStop']();}catch(e){}}
   const SIZE=11, CENTER=5;
   const VALUES={A:1,B:3,C:3,D:2,E:1,F:4,G:2,H:4,I:1,J:8,K:5,L:1,M:3,N:1,O:1,P:3,Q:10,R:1,S:1,T:1,U:1,V:4,W:4,X:8,Y:4,Z:10};
   const DIST={A:8,B:2,C:2,D:4,E:11,F:2,G:3,H:2,I:8,J:1,K:1,L:4,M:2,N:6,O:7,P:2,Q:1,R:6,S:4,T:6,U:4,V:2,W:2,X:1,Y:2,Z:1};
@@ -130224,13 +130276,16 @@ zzz`.split('\n'));
   let battleControl=new Map(); let matchRecorded=false;
   let passStreak=0; let stats={turns:0,totalDamage:0,biggestHit:0,swaps:0,combos:0,captures:0,counters:0,timeouts:0};
   let gameMode='pvp', cpuDifficulty='normal', cpuThinking=false, cpuLexiconReady=false;
-  let playerNames=['Player 1','Player 2'];
+  let playerNames=['Player 1','Player 2'],playerAvatars=['',''];
+  let currentMatchId='';
   let timerPreset='standard', clocks=[TIMER_PRESETS.standard,TIMER_PRESETS.standard], clockRunning=false, clockLast=Date.now(), clockHandle=null, matchStarted=false;
   const RELAY_WS='wss://word-combat-relay.up.railway.app/ws';
   const ACCOUNT_API='https://word-combat-relay.up.railway.app';
   let accountToken=storage.getItem('wordHavocAccountToken')||'',accountProfile=null,accountBusy=false;
   let onlineSocket=null,onlineConn=null,onlineRole=null,onlineCode='',onlineConnected=false,onlinePlayerIndex=0,onlineClosing=false,pendingIncomingRematch=false,waitingRematch=false,remoteActionProcessing=false,onlineActionPending=false,lastGuestActionId='',relayRetryTimer=null,onlineHeartbeatTimer=null,onlineMatchId='',matchStatSubmitted=false;
-  const localPlayerId=storage.getItem('wordHavocPlayerId')||((crypto.randomUUID?.()||('wh-'+Date.now()+'-'+Math.random().toString(36).slice(2))).replace(/[^a-zA-Z0-9-]/g,''));storage.setItem('wordHavocPlayerId',localPlayerId);
+  const tabStorage={getItem(k){try{return sessionStorage.getItem(k)}catch(e){return null}},setItem(k,v){try{sessionStorage.setItem(k,v)}catch(e){}}};
+  const localPlayerId=tabStorage.getItem('wordHavocTabPlayerId')||((crypto.randomUUID?.()||('wh-'+Date.now()+'-'+Math.random().toString(36).slice(2))).replace(/[^a-zA-Z0-9-]/g,''));tabStorage.setItem('wordHavocTabPlayerId',localPlayerId);
+  let opponentGoneTimer=null,onlineAbandoned=false;
   let playerIds=['',''];const blockedPlayers=new Set(JSON.parse(storage.getItem('wordHavocBlockedPlayers')||'[]'));
   let soundEnabled=storage.getItem('wordHavocSound')==='on',reducedMotion=storage.getItem('wordHavocMotion')==='reduced';
   let audioCtx=null;
@@ -130250,6 +130305,7 @@ zzz`.split('\n'));
   function shuffle(a){ for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; }
   function draw(n){ const out=[]; while(n-- > 0 && bag.length) out.push(bag.pop()); return out; }
   function newGame(skipReady=false){
+    currentMatchId=crypto.randomUUID?.()||('match-'+Date.now()+'-'+Math.random().toString(36).slice(2));
     window.KrynticActivity?.reset();
     cancelTurnTransition();moveBusy=false;$('passOverlay').classList.remove('show');
     clearTimeout(moveResultHideTimer);clearTimeout(scoreBurstTimer);$('moveResult')?.classList.remove('show');$('scoreBurst')?.classList.remove('show');
@@ -130258,12 +130314,12 @@ zzz`.split('\n'));
     players=[{hp:100,armor:0,rack:draw(7)},{hp:100,armor:0,rack:draw(7)}]; turn=gameMode==='cpu'?0:Math.floor(Math.random()*2); selectedRack.clear(); placements=[]; gameOver=false; cpuThinking=false; passStreak=0; battleControl=new Map(); siegeThreatPlayer=null; lastMoveCells=[];lastMovePlayer=null; reforgedThisTurn=false; lastAttackSummary=[null,null]; matchRecorded=false; matchStatSubmitted=false;if(gameMode==='online'&&onlineRole==='host')onlineMatchId=(crypto.randomUUID?.()||('match-'+Date.now()+'-'+Math.random().toString(36).slice(2))); matchStarted=false; stats={turns:0,totalDamage:0,biggestHit:0,swaps:0,combos:0,captures:0,counters:0,timeouts:0};
     const limit=TIMER_PRESETS[timerPreset]; clocks=[limit,limit]; clockRunning=false; clockLast=Date.now();
     $('p1Name').textContent=playerNames[0]; $('p2Name').textContent=playerNames[1];
-    $('modeSelect').value=gameMode; $('beginTurnBtn').disabled=false;$('overlaySecondaryBtn').style.display='none'; $('difficultySelect').value=cpuDifficulty; $('difficultySelect').style.display=gameMode==='cpu'?'inline-block':'none'; $('timerSelect').value=timerPreset; $('battlefieldSelect').value=battlefieldPreset; $('beginTurnBtn').style.display='block';
+    $('timerSelect').disabled=gameMode==='online';$('battlefieldSelect').disabled=gameMode==='online';$('modeSelect').value=gameMode; $('beginTurnBtn').disabled=false;$('overlaySecondaryBtn').style.display='none'; $('difficultySelect').value=cpuDifficulty; $('difficultySelect').style.display=gameMode==='cpu'?'inline-block':'none'; $('timerSelect').value=timerPreset; $('battlefieldSelect').value=battlefieldPreset; $('beginTurnBtn').style.display='block';
     logEl.innerHTML=''; const starter=playerLabel(turn); setStatus(`${starter}: opening attack must cross the center medallion.`,'info'); renderAll(); updateConnectionBanner(); if(skipReady){matchStarted=true;window.KrynticActivity?.start(gameMode);startClock();if(gameMode==='online')syncOnlineState();}else showMatchReady();
   }
 
   function playerLabel(i){if(gameMode==='cpu')return i===0?playerNames[0]:'Computer';return playerNames[i]||`Player ${i+1}`;}
-  function cleanName(v,fallback){v=String(v||'').replace(/[<>]/g,'').trim().slice(0,16);const toks=v.toLowerCase().split(/[^a-z]+/).filter(Boolean);if(toks.some(isContentBlocked))return fallback;return v||fallback;}
+  function cleanName(v,fallback){v=String(v||'').replace(/[<>]/g,'').trim().slice(0,20);const toks=v.toLowerCase().split(/[^a-z]+/).filter(Boolean);if(toks.some(isContentBlocked))return fallback;return v||fallback;}
   function accountErrorText(code){
     if(code==='username_invalid')return 'Username must be 3–16 letters, numbers, or underscores.';
     if(code==='username_taken')return 'That username is already taken.';
@@ -130304,17 +130360,17 @@ zzz`.split('\n'));
     catch(e){renderAccountProfile(accountErrorText(e.code),'bad');}
   }
   async function submitOnlineAccountResult(result){
-    if(matchStatSubmitted||gameMode!=='online'||onlineRole!=='host'||!accountToken||!onlineMatchId)return;matchStatSubmitted=true;
+    if(matchStatSubmitted||gameMode!=='online'||onlineRole!=='host'||!accountProfile||!accountToken||!onlineMatchId)return;matchStatSubmitted=true;
     try{await accountRequest('/stats/match',{method:'POST',body:{room:onlineCode,matchId:onlineMatchId,winner:result}});await refreshAccount(true);}
     catch(e){matchStatSubmitted=false;console.warn('Online stats could not be saved',e);}
   }
   function isLocalTurn(){if(remoteActionProcessing)return true;if(turnTransition||moveBusy||!matchStarted||(gameMode==='online'&&onlineRole==='guest'&&onlineActionPending))return false;if(gameMode==='online')return onlineConnected&&turn===onlinePlayerIndex;if(gameMode==='cpu')return turn===0;return true;}
   function toast(msg){const el=$('toast');if(!el)return;el.textContent=msg;el.classList.add('show');clearTimeout(toast._t);toast._t=setTimeout(()=>el.classList.remove('show'),1800);}
   function pulsePlayerCard(i,kind='hit'){const el=$(`p${i+1}card`);if(!el||reducedMotion)return;const cls=kind==='heal'?'healPulse':'hitTaken';el.classList.remove(cls);void el.offsetWidth;el.classList.add(cls);setTimeout(()=>el.classList.remove(cls),430);}
-  function initAudio(){if(!soundEnabled)return;try{audioCtx=audioCtx||new (window.AudioContext||window.webkitAudioContext)();if(audioCtx.state==='suspended')audioCtx.resume();}catch(e){}}
+  function initAudio(){if(!soundEnabled||cgMuted)return;try{audioCtx=audioCtx||new (window.AudioContext||window.webkitAudioContext)();if(audioCtx.state==='suspended')audioCtx.resume();}catch(e){}}
   function sfx(kind){
     if(['attack','heal','armor','capture','win'].includes(kind))nativeHaptic(kind==='win'?'heavy':'medium');
-    if(!soundEnabled||kind==='tick')return;
+    if(!soundEnabled||cgMuted||kind==='tick')return;
     initAudio();if(!audioCtx)return;
     const now=audioCtx.currentTime;
     const play=(freq,start=0,dur=.075,gain=.014,endFreq=null)=>{try{const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.type='sine';o.frequency.setValueAtTime(freq,now+start);if(endFreq)o.frequency.exponentialRampToValueAtTime(endFreq,now+start+dur);g.gain.setValueAtTime(.0001,now+start);g.gain.exponentialRampToValueAtTime(gain,now+start+.008);g.gain.exponentialRampToValueAtTime(.0001,now+start+dur);o.connect(g);g.connect(audioCtx.destination);o.start(now+start);o.stop(now+start+dur+.01);}catch(e){}};
@@ -130324,14 +130380,14 @@ zzz`.split('\n'));
     else if(kind==='capture'){play(260,0,.07,.012,320);play(390,.055,.085,.009,430);}
     else if(kind==='win'){play(392,0,.11,.012,440);play(523,.09,.13,.011,587);play(659,.18,.16,.010,740);}
   }
-  function updateConnectionBanner(msg,kind){const el=$('connectionBanner');if(!el)return;const sb=$('onlineSafetyBtn');if(sb)sb.style.display=(gameMode==='online'&&matchStarted)?'inline-block':'none';el.className='connectionBanner'+(kind?' '+kind:'');if(msg){el.textContent=msg;return;}if(gameMode==='online'){el.classList.add(onlineConnected?'online':'warn');el.textContent=onlineConnected?`ONLINE • ${onlineRole==='host'?'HOST':'GUEST'} • CODE ${onlineCode} • ${playerNames[0]} vs ${playerNames[1]}`:`ONLINE • CODE ${onlineCode||'------'} • CONNECTING…`;}else if(gameMode==='cpu'){el.textContent=`PRACTICE • ${cpuDifficulty.toUpperCase()} CPU • ${battlefieldPreset.toUpperCase()} • ${timerPreset.toUpperCase()}`;}else el.textContent=`LOCAL DUEL • ${battlefieldPreset.toUpperCase()} • ${timerPreset.toUpperCase()}`;}
+  function updateConnectionBanner(msg,kind){const el=$('connectionBanner');if(!el)return;const sb=$('onlineSafetyBtn');if(sb)sb.style.display=(gameMode==='online'&&matchStarted)?'inline-block':'none';el.className='connectionBanner'+(kind?' '+kind:'');if(msg){el.textContent=msg;return;}if(gameMode==='online'){el.classList.add(onlineConnected?'online':'warn');el.textContent=onlineConnected?`ONLINE DUEL • ${playerNames[0]} vs ${playerNames[1]}`:'ONLINE • FINDING OPPONENT…';}else if(gameMode==='cpu'){el.textContent=`PRACTICE • ${cpuDifficulty.toUpperCase()} CPU • ${battlefieldPreset.toUpperCase()} • ${timerPreset.toUpperCase()}`;}else el.textContent=`LOCAL DUEL • ${battlefieldPreset.toUpperCase()} • ${timerPreset.toUpperCase()}`;}
   function clonePlayerForViewer(p,i,viewerIndex,includeSecrets=false){
     const copy={...p};
     copy.rack=(includeSecrets||i===viewerIndex)?[...p.rack]:Array(p.rack.length).fill('?');
     return copy;
   }
   function statePayload(viewerIndex,result=null,includeSecrets=false){
-    const payload={type:'state',v:3,board,players:players.map((p,i)=>clonePlayerForViewer(p,i,viewerIndex,includeSecrets)),turn,battleControl:[...battleControl.entries()],passStreak,stats,gameOver,siegeThreatPlayer,lastMoveCells,lastMovePlayer,reforgedThisTurn,lastAttackSummary,clocks,matchStarted,timerPreset,battlefieldPreset,playerNames,onlineMatchId,logHtml:logEl.innerHTML,result};
+    const payload={type:'state',v:3,board,players:players.map((p,i)=>clonePlayerForViewer(p,i,viewerIndex,includeSecrets)),turn,battleControl:[...battleControl.entries()],passStreak,stats,gameOver,siegeThreatPlayer,lastMoveCells,lastMovePlayer,reforgedThisTurn,lastAttackSummary,clocks,matchStarted,timerPreset,battlefieldPreset,playerNames,playerAvatars,onlineMatchId,logHtml:logEl.innerHTML,result};
     if(includeSecrets)payload.bag=[...bag]; else payload.bagCount=bag.length;
     return payload;
   }
@@ -130350,7 +130406,7 @@ zzz`.split('\n'));
     if(Number.isInteger(m.bagCount))bag=Array(Math.max(0,m.bagCount)).fill('?');
     players=m.players||players;
     turn=Number.isInteger(m.turn)?m.turn:turn;
-    battleControl=new Map(m.battleControl||[]);passStreak=m.passStreak||0;stats=m.stats||stats;gameOver=!!m.gameOver;siegeThreatPlayer=m.siegeThreatPlayer??null;lastMoveCells=m.lastMoveCells||[];lastMovePlayer=m.lastMovePlayer??null;reforgedThisTurn=!!m.reforgedThisTurn;lastAttackSummary=Array.isArray(m.lastAttackSummary)?m.lastAttackSummary:[null,null];clocks=m.clocks||clocks;if(m.matchStarted&&!matchStarted)window.KrynticActivity?.start('online');matchStarted=!!m.matchStarted;onlineMatchId=String(m.onlineMatchId||onlineMatchId);timerPreset=m.timerPreset||timerPreset;applyBattlefieldPreset(m.battlefieldPreset||battlefieldPreset);playerNames=(m.playerNames||playerNames).map((x,i)=>cleanName(x,`Player ${i+1}`));$('p1Name').textContent=playerNames[0];$('p2Name').textContent=playerNames[1];$('modeSelect').value='online';$('difficultySelect').style.display='none';$('timerSelect').value=timerPreset;$('battlefieldSelect').value=battlefieldPreset;if(typeof m.logHtml==='string'){const t=document.createElement('template');t.innerHTML=m.logHtml;for(const el of [...t.content.querySelectorAll('*')]){if(!['DIV','B','SPAN','BR'].includes(el.tagName)){el.replaceWith(document.createTextNode(el.textContent||''));continue;}for(const attr of [...el.attributes])el.removeAttribute(attr.name);if(el.tagName==='DIV')el.className='logItem';}logEl.replaceChildren(t.content);}placements=[];selectedRack.clear();$('passOverlay').classList.remove('show');$('beginTurnBtn').disabled=false;$('overlaySecondaryBtn').style.display='none';$('startOverlay').classList.remove('show');renderAll();updateConnectionBanner();if(m.result){if(m.result.draw)showStalemate(true);else showGameOver(m.result.winner,m.result.data||{},true);}else if(!gameOver){startClock();setStatus(isLocalTurn()?'Your turn — build your attack.':`${playerLabel(turn)} is thinking…`,'info');}
+    battleControl=new Map(m.battleControl||[]);passStreak=m.passStreak||0;stats=m.stats||stats;gameOver=!!m.gameOver;siegeThreatPlayer=m.siegeThreatPlayer??null;lastMoveCells=m.lastMoveCells||[];lastMovePlayer=m.lastMovePlayer??null;reforgedThisTurn=!!m.reforgedThisTurn;lastAttackSummary=Array.isArray(m.lastAttackSummary)?m.lastAttackSummary:[null,null];clocks=m.clocks||clocks;if(m.matchStarted&&!matchStarted)window.KrynticActivity?.start('online');matchStarted=!!m.matchStarted;onlineMatchId=String(m.onlineMatchId||onlineMatchId);timerPreset=m.timerPreset||timerPreset;applyBattlefieldPreset(m.battlefieldPreset||battlefieldPreset);playerAvatars=(Array.isArray(m.playerAvatars)?m.playerAvatars:['','']).slice(0,2).map(safeAvatar);playerNames=(m.playerNames||playerNames).map((x,i)=>cleanName(x,`Player ${i+1}`));$('p1Name').textContent=playerNames[0];$('p2Name').textContent=playerNames[1];$('modeSelect').value='online';$('difficultySelect').style.display='none';$('timerSelect').value=timerPreset;$('battlefieldSelect').value=battlefieldPreset;if(typeof m.logHtml==='string'){const t=document.createElement('template');t.innerHTML=m.logHtml;for(const el of [...t.content.querySelectorAll('*')]){if(!['DIV','B','SPAN','BR'].includes(el.tagName)){el.replaceWith(document.createTextNode(el.textContent||''));continue;}for(const attr of [...el.attributes])el.removeAttribute(attr.name);if(el.tagName==='DIV')el.className='logItem';}logEl.replaceChildren(t.content);}placements=[];selectedRack.clear();$('passOverlay').classList.remove('show');$('beginTurnBtn').disabled=false;$('overlaySecondaryBtn').style.display='none';$('startOverlay').classList.remove('show');renderAll();updateConnectionBanner();if(m.result){if(m.result.draw)showStalemate(true);else showGameOver(m.result.winner,m.result.data||{},true);}else if(!gameOver){startClock();setStatus(isLocalTurn()?'Your turn — build your attack.':`${playerLabel(turn)} is thinking…`,'info');}
   }
   function sendGuestAction(action,data={}){
     if(gameMode!=='online'||onlineRole!=='guest'||!onlineConn||!onlineConn.open||onlineActionPending)return false;
@@ -130384,7 +130440,7 @@ zzz`.split('\n'));
       }else if(m.action==='surrender'){
         gameOver=true;showGameOver(0,{surrender:true});
       }
-    }finally{remoteActionProcessing=false;}
+    }finally{remoteActionProcessing=false;syncOnlineState();}
   }
   function makeSocketConnection(ws){
     return {
@@ -130407,23 +130463,28 @@ zzz`.split('\n'));
     if(!onlineCode||!role)return;
     clearTimeout(relayRetryTimer);
     try{onlineSocket?.close();}catch(e){}
-    const url=`${RELAY_WS}?room=${encodeURIComponent(onlineCode)}&role=${encodeURIComponent(role)}&player=${encodeURIComponent(localPlayerId)}`;
+    const url=role==='queue'?`${RELAY_WS.replace('/ws','/match')}?player=${encodeURIComponent(localPlayerId)}`:`${RELAY_WS}?room=${encodeURIComponent(onlineCode)}&role=${encodeURIComponent(role)}&player=${encodeURIComponent(localPlayerId)}`;
     let ws;
     try{ws=new WebSocket(url);}catch(e){$('launchStatus').textContent='Could not open the online connection.';scheduleRelayReconnect();return;}
     onlineSocket=ws;onlineConn=makeSocketConnection(ws);
     ws.addEventListener('open',()=>{
       if(ws!==onlineSocket)return;
-      if(role==='host'){
-        $('launchStatus').innerHTML=`Match code: <b class="bigCode">${onlineCode}</b><br>Send this code to your opponent. Waiting for them to join…`;
-        $('shareInviteBtn').style.display='block';
-      }else $('launchStatus').textContent=`Connected to relay. Joining ${onlineCode}…`;
+      $('launchStatus').textContent=role==='queue'?'Finding an opponent… You can cancel at any time.':'Reconnecting to your match…';
       updateConnectionBanner(isRetry?'RECONNECTED TO MATCH RELAY':'ONLINE RELAY CONNECTED',isRetry?'online':'');if(onlineHeartbeatTimer)clearInterval(onlineHeartbeatTimer);onlineHeartbeatTimer=setInterval(()=>{if(onlineConn?.open)onlineConn.send({type:'heartbeat'});},30000);
     });
     ws.addEventListener('message',ev=>{
       if(ws!==onlineSocket)return;
       let m;try{m=JSON.parse(String(ev.data));}catch(e){return;}
+      if(m?.type==='queued')return;
+      if(m?.type==='matched'){
+        role=m.role;onlineRole=role;onlineCode=m.room;onlinePlayerIndex=role==='host'?0:1;
+        $('cancelMatchBtn').hidden=true;$('createOnlineBtn').disabled=false;
+        $('launchStatus').textContent='Opponent found. Starting duel…';
+        if(role==='host'){playerNames=[localDisplayName(),'Opponent'];playerAvatars=[localAvatar(),''];}else{playerNames=['Opponent',localDisplayName()];playerAvatars=['',localAvatar()];onlineConn.send({type:'join',name:localDisplayName(),avatar:localAvatar(),playerId:localPlayerId});}
+        return;
+      }
       if(m?.type==='relayReady'){
-        if(accountToken&&onlineConn?.open)onlineConn.send({type:'authenticate',token:accountToken});
+        if(role==='guest')onlineConn.send({type:'join',name:localDisplayName(),avatar:localAvatar(),playerId:localPlayerId});
         return;
       }
       if(m?.type==='heartbeatAck')return;
@@ -130431,11 +130492,14 @@ zzz`.split('\n'));
       if(m?.type==='authError'){logoutAccount();$('launchStatus').textContent='Your sign-in expired. Sign in again.';return;}
       if(m?.type==='peerProfile'){const i=m.role==='host'?0:1;playerNames[i]=cleanName(m.username,playerNames[i]||`Player ${i+1}`);if($('p'+(i+1)+'Name'))$('p'+(i+1)+'Name').textContent=playerNames[i];return;}
       if(m?.type==='relayPeerConnected'){
-        if(role==='host')$('launchStatus').textContent='Opponent connected. Verifying account…';
+        clearTimeout(opponentGoneTimer);
+        if(role==='host')$('launchStatus').textContent='Opponent connected. Starting duel…';
         return;
       }
       if(m?.type==='relayWaiting')return;
+      if(m?.type==='matchExpired'){expireOnlineMatch();return;}
       if(m?.type==='relayPeerClosed'){
+        clearTimeout(opponentGoneTimer);opponentGoneTimer=setTimeout(expireOnlineMatch,60000);
         onlineConnected=false;pauseClock();updateConnectionBanner('OPPONENT DISCONNECTED • match paused for reconnection','warn');setStatus('Opponent disconnected. The match is paused until they reconnect.','bad');return;
       }
       if(m?.type==='relayError'){
@@ -130454,10 +130518,12 @@ zzz`.split('\n'));
   function handleOnlineMessage(m){
     if(!m||typeof m!=='object')return;
     if(m.type==='join'&&onlineRole==='host'){
-      const guestId=String(m.playerId||'');if(guestId&&blockedPlayers.has(guestId)){onlineConn.send({type:'blocked'});return;}playerIds[1]=guestId;playerNames[1]=cleanName(m.name,'Opponent');onlineConnected=true;onlineConn.send({type:'welcome',hostName:playerNames[0],hostId:localPlayerId,code:onlineCode,timerPreset,battlefieldPreset});$('launchStatus').innerHTML=`<b>${playerNames[1]}</b> joined. Starting match…`;if(!matchStarted)newGame(true);else syncOnlineState();$('startOverlay').classList.remove('show');updateConnectionBanner();return;
+      clearTimeout(opponentGoneTimer);
+      const guestId=String(m.playerId||'');if(guestId&&blockedPlayers.has(guestId)){onlineConn.send({type:'blocked'});return;}playerIds[1]=guestId;playerNames[1]=cleanName(m.name,'Opponent');playerAvatars[1]=safeAvatar(m.avatar);onlineConnected=true;onlineConn.send({type:'welcome',hostName:playerNames[0],hostAvatar:playerAvatars[0],hostId:localPlayerId,code:onlineCode,timerPreset,battlefieldPreset});$('launchStatus').innerHTML=`<b>${playerNames[1]}</b> joined. Starting match…`;if(!matchStarted)newGame(true);else {startClock();syncOnlineState();}$('startOverlay').classList.remove('show');updateConnectionBanner();return;
     }
     if(m.type==='welcome'&&onlineRole==='guest'){
-      const hostId=String(m.hostId||'');if(hostId&&blockedPlayers.has(hostId)){onlineConn.send({type:'blocked'});$('launchStatus').textContent='This player is blocked on this device.';try{onlineSocket?.close();}catch(e){}return;}playerIds[0]=hostId;playerNames[0]=cleanName(m.hostName,'Host');timerPreset=m.timerPreset||timerPreset;applyBattlefieldPreset(m.battlefieldPreset||battlefieldPreset);onlineCode=m.code||onlineCode;onlineConnected=true;updateConnectionBanner();return;
+      clearTimeout(opponentGoneTimer);
+      const hostId=String(m.hostId||'');if(hostId&&blockedPlayers.has(hostId)){onlineConn.send({type:'blocked'});$('launchStatus').textContent='This player is blocked on this device.';try{onlineSocket?.close();}catch(e){}return;}playerIds[0]=hostId;playerNames[0]=cleanName(m.hostName,'Host');playerAvatars[0]=safeAvatar(m.hostAvatar);timerPreset=m.timerPreset||timerPreset;applyBattlefieldPreset(m.battlefieldPreset||battlefieldPreset);onlineCode=m.code||onlineCode;onlineConnected=true;updateConnectionBanner();return;
     }
     if(m.type==='blocked'){onlineConnected=false;pauseClock();$('launchStatus').textContent='This online connection was blocked.';$('startOverlay').classList.add('show');try{onlineSocket?.close();}catch(e){}return;}
     if(m.type==='state'){if(onlineRole==='guest')applyRemoteState(m);return;}
@@ -130466,16 +130532,27 @@ zzz`.split('\n'));
     if(m.type==='rematchAccept'&&onlineRole==='host'){pendingIncomingRematch=false;waitingRematch=false;newGame(true);syncOnlineState();return;}
     if(m.type==='surrender'&&onlineRole==='host'){gameOver=true;showGameOver(0,{surrender:true});return;}
   }
+  function expireOnlineMatch(){
+    clearTimeout(opponentGoneTimer);pauseClock();onlineConnected=false;onlineAbandoned=true;gameOver=true;
+    $('overlayTitle').textContent='Opponent disconnected';$('overlayText').textContent='Your opponent did not reconnect. Find another player to start a new duel.';
+    $('overlayDamage').style.display='none';$('beginTurnBtn').disabled=false;$('beginTurnBtn').textContent='Find Match';$('overlaySecondaryBtn').style.display='block';$('passOverlay').classList.add('show');
+  }
   function destroyOnline(){
+    clearTimeout(opponentGoneTimer);onlineAbandoned=false;
+    if($('cancelMatchBtn'))$('cancelMatchBtn').hidden=true;if($('createOnlineBtn'))$('createOnlineBtn').disabled=false;
     if($('shareInviteBtn'))$('shareInviteBtn').style.display='none';onlineClosing=true;clearTimeout(relayRetryTimer);relayRetryTimer=null;if(onlineHeartbeatTimer){clearInterval(onlineHeartbeatTimer);onlineHeartbeatTimer=null;}
     try{onlineSocket?.close(1000,'Leaving match');}catch(e){}
     onlineSocket=null;onlineConn=null;onlineConnected=false;onlineRole=null;onlineCode='';pendingIncomingRematch=false;waitingRematch=false;onlineActionPending=false;remoteActionProcessing=false;lastGuestActionId='';onlineClosing=false;
   }
   function randomCode(){const chars='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';let x='';for(let i=0;i<6;i++)x+=chars[Math.floor(Math.random()*chars.length)];return x;}
-  function createOnlineMatch(){
-    if(!accountProfile||!accountToken){$('launchStatus').textContent='Sign in or create a Word Havoc account to play online.';return;}
-    if(!$('onlineTermsCheck').checked){$('launchStatus').textContent='Agree to the Terms and fair-play rules before creating an online match.';return;}
-    destroyOnline();gameMode='online';onlineRole='host';onlinePlayerIndex=0;onlineCode=randomCode();playerNames=[accountProfile.username,'Opponent'];playerIds=[localPlayerId,''];timerPreset=$('launchTimer').value;applyBattlefieldPreset($('launchMap').value);$('launchStatus').innerHTML=`Creating match <b>${onlineCode}</b>…`;connectRelay('host');
+  async function createOnlineMatch(){
+    await initCrazyGames();
+    destroyOnline();pauseClock();matchStarted=false;gameOver=false;
+    gameMode='online';onlineRole='queue';onlinePlayerIndex=0;onlineCode='QUEUE';
+    playerNames=[localDisplayName(),'Opponent'];playerAvatars=[localAvatar(),''];playerIds=[localPlayerId,''];
+    timerPreset='standard';applyBattlefieldPreset('frontline');
+    $('createOnlineBtn').disabled=true;$('cancelMatchBtn').hidden=false;
+    $('launchStatus').textContent='Finding an opponent…';connectRelay('queue');
   }
   function joinOnlineMatch(){
     if(!accountProfile||!accountToken){$('launchStatus').textContent='Sign in or create a Word Havoc account to play online.';return;}
@@ -130494,20 +130571,20 @@ zzz`.split('\n'));
     if(gameMode!=='online'||!matchStarted){$('safetyOverlay').classList.remove('show');return;}
     const id=playerIds[1-onlinePlayerIndex];if(id){blockedPlayers.add(id);storage.setItem('wordHavocBlockedPlayers',JSON.stringify([...blockedPlayers]));}
     try{onlineConn?.send({type:'blocked'});}catch(e){}
-    $('safetyOverlay').classList.remove('show');destroyOnline();pauseClock();matchStarted=false;gameOver=true;$('startOverlay').classList.add('show');$('launchStatus').textContent='Opponent blocked on this device. Create or join a different match to play again.';updateConnectionBanner('MAIN MENU');
+    $('safetyOverlay').classList.remove('show');destroyOnline();pauseClock();matchStarted=false;gameOver=true;$('startOverlay').classList.add('show');$('launchStatus').textContent='Opponent blocked on this device. Use Find Match to play again.';updateConnectionBanner('MAIN MENU');
   }
-  window.wordHavocBack=()=>{if($('settingsOverlay').classList.contains('show')){$('settingsOverlay').classList.remove('show');return true;}if($('helpOverlay').classList.contains('show')){$('helpOverlay').classList.remove('show');return true;}if($('passOverlay').classList.contains('show'))return true;if(matchStarted&&!gameOver){return false;}showMainMenu(true);return true;};
-  function resetLaunchMenu(){const main=$('launchMainChoices');if(main)main.hidden=false;['launchOnlinePanel','launchCpuPanel','launchLocalPanel'].forEach(id=>{const el=$(id);if(el)el.hidden=true;});const opt=$('launchOptions');if(opt)opt.open=false;}
+  window.wordHavocBack=()=>{if($('playerRecordOverlay').classList.contains('show')){$('playerRecordOverlay').classList.remove('show');return true;}if($('settingsOverlay').classList.contains('show')){$('settingsOverlay').classList.remove('show');return true;}if($('helpOverlay').classList.contains('show')){$('helpOverlay').classList.remove('show');return true;}if($('passOverlay').classList.contains('show'))return true;if(matchStarted&&!gameOver){return false;}showMainMenu(true);return true;};
+  function resetLaunchMenu(){if($('launchOptions'))$('launchOptions').hidden=false;const main=$('launchMainChoices');if(main)main.hidden=false;['launchOnlinePanel','launchCpuPanel','launchLocalPanel'].forEach(id=>{const el=$(id);if(el)el.hidden=true;});const opt=$('launchOptions');if(opt)opt.open=false;}
   function showMainMenu(force=false){if(matchStarted&&!gameOver&&!force&&!confirm('Leave the current match and return to the main menu?'))return;cancelTurnTransition();cpuThinking=false;matchStarted=false;pauseClock();if(gameMode==='online')destroyOnline();$('passOverlay').classList.remove('show');resetLaunchMenu();$('startOverlay').classList.add('show');$('launchStatus').textContent='';updateConnectionBanner('MAIN MENU');}
-  function surrenderMatch(){if(!matchStarted||gameOver)return;if(!confirm('Surrender this match?'))return;if(gameMode==='online'&&onlineRole==='guest'){if(onlineConn?.open){onlineConn.send({type:'action',id:`${Date.now()}-surrender`,action:'surrender'});setStatus('Surrender sent. Waiting for host confirmation…','info');}return;}const loser=gameMode==='online'?onlinePlayerIndex:turn;gameOver=true;showGameOver(1-loser,{surrender:true});}
+  function surrenderMatch(){if(!matchStarted||gameOver)return;if(!confirm('Surrender this match?'))return;if(gameMode==='online'&&onlineRole==='guest'){if(onlineConn?.open){onlineConn.send({type:'action',id:`${Date.now()}-surrender`,action:'surrender'});setStatus('Surrender sent. Waiting for host confirmation…','info');}return;}const loser=gameMode==='online'?onlinePlayerIndex:gameMode==='cpu'?0:turn;gameOver=true;showGameOver(1-loser,{surrender:true});}
   function formatClock(ms){if(ms==null)return '∞';const sec=Math.max(0,Math.ceil(ms/1000)),m=Math.floor(sec/60),s=sec%60;return `${m}:${String(s).padStart(2,'0')}`;}
   function syncClock(){
     if(!clockRunning||gameOver||TIMER_PRESETS[timerPreset]==null)return;
     const now=Date.now(),elapsed=Math.max(0,now-clockLast);clockLast=now;clocks[turn]=Math.max(0,clocks[turn]-elapsed);
     if(clocks[turn]<=0){clockRunning=false;if(gameMode!=='online'||onlineRole==='host')handleTimeout(turn);}
   }
-  function startClock(){if(gameOver||!matchStarted||TIMER_PRESETS[timerPreset]==null){renderClocks();return;}clockLast=Date.now();clockRunning=true;renderClocks();}
-  function pauseClock(){if(clockRunning)syncClock();clockRunning=false;renderClocks();}
+  function startClock(){cgGameplay(matchStarted&&!gameOver);if(gameOver||!matchStarted||TIMER_PRESETS[timerPreset]==null){renderClocks();return;}clockLast=Date.now();clockRunning=true;renderClocks();}
+  function pauseClock(){cgGameplay(false);if(clockRunning)syncClock();clockRunning=false;renderClocks();}
   function renderClocks(){
     const limit=TIMER_PRESETS[timerPreset];
     for(let i=0;i<2;i++){
@@ -130607,17 +130684,77 @@ zzz`.split('\n'));
     $('p1card').classList.toggle('active',turn===0&&!gameOver);$('p2card').classList.toggle('active',turn===1&&!gameOver);
     $('p1card').classList.toggle('lowHP',players[0].hp<=25);$('p2card').classList.toggle('lowHP',players[1].hp<=25); renderLastAttack(); renderClocks(); renderSiege();
   }
-  function getMatchHistory(){try{return JSON.parse(storage.getItem('wordHavocMatchHistory')||'[]')}catch(e){return []}}
+  function safeAvatar(value){try{const u=new URL(String(value||''));return u.protocol==='https:'&&u.hostname==='images.crazygames.com'&&u.href.length<1024?u.href:''}catch(e){return ''}}
+  function localDisplayName(){return cleanName(cgUser?.username,`Guest-${localPlayerId.slice(-4).toUpperCase()}`)}
+  function localAvatar(){return safeAvatar(cgUser?.profilePictureUrl)}
+  function setAvatar(el,url){if(!el)return;const safe=safeAvatar(url);el.hidden=!safe;if(safe){el.referrerPolicy='no-referrer';el.src=safe;el.onerror=()=>{el.hidden=true}}else el.removeAttribute('src')}
+  function renderPlayerIdentity(){for(let i=0;i<2;i++){const el=$('p'+(i+1)+'Name');if(el)el.textContent=playerNames[i];setAvatar($('p'+(i+1)+'Avatar'),playerAvatars[i])}}
+  function applyPortalIdentity(){
+    if($('launchName1'))$('launchName1').value=localDisplayName();
+    if(gameMode==='online'&&['host','guest'].includes(onlineRole)){
+      playerNames[onlinePlayerIndex]=localDisplayName();playerAvatars[onlinePlayerIndex]=localAvatar();
+      if(onlineConnected){if(onlineRole==='host')syncOnlineState();else onlineConn?.send({type:'join',name:localDisplayName(),avatar:localAvatar(),playerId:localPlayerId})}
+    }else{playerNames[0]=localDisplayName();playerAvatars[0]=localAvatar()}
+    renderPlayerIdentity();
+  }
+  function loadSavedPreferences(){
+    soundEnabled=storage.getItem('wordHavocSound')==='on';reducedMotion=storage.getItem('wordHavocMotion')==='reduced';
+    document.body.classList.toggle('reducedMotion',reducedMotion);$('soundToggle').checked=soundEnabled;$('motionToggle').checked=reducedMotion;
+    $('launchDifficulty').value='normal';$('launchTimer').value='standard';$('launchMap').value='frontline';
+    try{const p=JSON.parse(storage.getItem('wordHavocPreferencesV1')||'{}');
+      if(['easy','normal','hard'].includes(p.difficulty))$('launchDifficulty').value=p.difficulty;
+      if(Object.hasOwn(TIMER_PRESETS,p.timer))$('launchTimer').value=p.timer;
+      if(Object.hasOwn(BATTLEFIELDS,p.map))$('launchMap').value=p.map;
+      updateLaunchSettingsSummary();
+    }catch(e){}
+  }
+  function savePreferences(){storage.setItem('wordHavocPreferencesV1',JSON.stringify({difficulty:$('launchDifficulty').value,timer:$('launchTimer').value,map:$('launchMap').value}));renderPortalProfile()}
+  function renderPortalProfile(){
+    if(!$('portalName'))return;
+    $('portalName').textContent=localDisplayName();setAvatar($('portalAvatar'),localAvatar());
+    $('recordOwner').textContent=localDisplayName();
+    $('recordSaveStatus').textContent=cgSaveError?'Progress saving is unavailable. Your latest results may not be saved.':cgData?(cgUser?'CrazyGames cloud saves · available across your devices.':'Guest progress saved on this browser through CrazyGames.'):'Progress saved on this browser.';
+    const p=readProgress();for(const [id,key] of [['recordGames','games'],['recordWins','wins'],['recordLosses','losses'],['recordDraws','draws']])$(id).textContent=p.total[key];
+    $('recordModes').textContent=`Online: ${p.online.wins} wins · ${p.online.losses} losses · ${p.online.draws} draws. Practice: ${p.cpu.wins} wins · ${p.cpu.losses} losses · ${p.cpu.draws} draws.`;
+    const list=$('recordHistory');list.replaceChildren();
+    for(const entry of [...p.history].reverse().slice(0,10)){const li=document.createElement('li'),title=document.createElement('strong');title.textContent=entry.result==='win'?'WIN':entry.result==='loss'?'LOSS':entry.result==='draw'?'DRAW':entry.mode==='pvp'?'LOCAL DUEL':'PAST MATCH';li.append(title,document.createTextNode(` · ${entry.mode==='online'?'Online':entry.mode==='cpu'?'Practice':'Local'} · ${cleanName(entry.opponent,'Opponent')} · ${new Date(entry.at).toLocaleDateString()}`));list.append(li)}
+    if(!list.children.length){const li=document.createElement('li');li.textContent='Complete a match to start your record.';list.append(li)}
+  }
+  function emptyRecord(){return {games:0,wins:0,losses:0,draws:0,bestHit:0}}
+  function emptyProgress(){return {v:1,total:emptyRecord(),cpu:emptyRecord(),online:emptyRecord(),history:[]}}
+  function safeCount(n){return Number.isSafeInteger(n)&&n>=0?n:0}
+  function readProgress(){
+    try{const p=JSON.parse(storage.getItem('wordHavocProgressV1')||'null');if(!p||p.v!==1)return emptyProgress();
+      const out=emptyProgress();for(const k of ['total','cpu','online'])for(const f of Object.keys(out[k]))out[k][f]=safeCount(p[k]?.[f]);
+      out.history=Array.isArray(p.history)?p.history.filter(x=>x&&typeof x==='object'&&Number.isFinite(x.at)).slice(-20):[];return out;
+    }catch(e){return emptyProgress()}
+  }
+  function addRecordResult(p,entry){
+    if(!['cpu','online'].includes(entry.mode)||!['win','loss','draw'].includes(entry.result))return;
+    for(const k of ['total',entry.mode]){p[k].games++;p[k][entry.result==='win'?'wins':entry.result==='loss'?'losses':'draws']++;p[k].bestHit=Math.max(p[k].bestHit,safeCount(entry.biggestHit))}
+  }
+  function importLegacyHistory(){
+    if(localStorageSafe.getItem('wordHavocProgressV1')!==null)return;
+    try{const old=JSON.parse(localStorageSafe.getItem('wordHavocMatchHistory')||'[]');if(!Array.isArray(old)||!old.length)return;
+      const p=emptyProgress();p.history=old.filter(x=>x&&Number.isFinite(x.at)).slice(-20).map(x=>({...x,result:x.mode==='cpu'?(x.winner===-1?'draw':x.winner===0?'win':'loss'):'legacy'}));
+      for(const entry of p.history)addRecordResult(p,entry);localStorageSafe.setItem('wordHavocProgressV1',JSON.stringify(p));
+    }catch(e){}
+  }
+  function getMatchHistory(){return readProgress().history}
   function recordMatch(winner){
-    if(matchRecorded)return; matchRecorded=true; window.KrynticActivity?.finish(); const history=getMatchHistory();
-    history.push({v:'1.0.0',mode:gameMode,difficulty:cpuDifficulty,timer:timerPreset,turns:stats.turns,totalDamage:stats.totalDamage,biggestHit:stats.biggestHit,swaps:stats.swaps,combos:stats.combos,captures:stats.captures,counters:stats.counters,timeouts:stats.timeouts,winner,p1hp:Math.max(0,players[0].hp),p2hp:Math.max(0,players[1].hp),p1armor:players[0].armor||0,p2armor:players[1].armor||0,control:controlCounts(),at:Date.now()});
-    storage.setItem('wordHavocMatchHistory',JSON.stringify(history.slice(-20)));
+    if(matchRecorded)return;matchRecorded=true;window.KrynticActivity?.finish();
+    const p=readProgress(),id=gameMode==='online'?onlineMatchId:currentMatchId;
+    if(id&&p.history.some(x=>x.id===id))return;
+    const viewer=gameMode==='online'?onlinePlayerIndex:gameMode==='cpu'?0:null;
+    const entry={id,v:'1.0.1',mode:gameMode,difficulty:cpuDifficulty,timer:timerPreset,turns:stats.turns,totalDamage:stats.totalDamage,biggestHit:stats.biggestHit,swaps:stats.swaps,combos:stats.combos,captures:stats.captures,counters:stats.counters,timeouts:stats.timeouts,winner,viewerIndex:viewer,result:viewer===null?'local':winner===-1?'draw':winner===viewer?'win':'loss',opponent:viewer===null?'Local duel':playerLabel(1-viewer),p1hp:Math.max(0,players[0].hp),p2hp:Math.max(0,players[1].hp),at:Date.now()};
+    p.history.push(entry);p.history=p.history.slice(-20);addRecordResult(p,entry);
+    storage.setItem('wordHavocProgressV1',JSON.stringify(p));renderPortalProfile();
   }
   function renderStats(){
     $('statTurns').textContent=stats.turns; $('statDamage').textContent=stats.totalDamage; $('statBiggest').textContent=stats.biggestHit; $('statSwaps').textContent=stats.swaps; $('statCombos').textContent=stats.combos; $('statCaptures').textContent=stats.captures; $('statCounters').textContent=stats.counters; $('statTimeouts').textContent=stats.timeouts;
-    const h=getMatchHistory(); if(h.length){const sample=h.slice(-10),avg=sample.reduce((s,x)=>s+x.turns,0)/sample.length,hit=sample.reduce((s,x)=>s+x.biggestHit,0)/sample.length;$('balanceLine').textContent=`Local balance data: ${h.length} completed match${h.length===1?'':'es'} • recent avg ${avg.toFixed(1)} turns • avg biggest hit ${hit.toFixed(1)}.`;} else $('balanceLine').textContent='Complete matches to build balance data on this device.';
+    const h=getMatchHistory(); if(h.length){const sample=h.slice(-10),avg=sample.reduce((s,x)=>s+x.turns,0)/sample.length,hit=sample.reduce((s,x)=>s+x.biggestHit,0)/sample.length;$('balanceLine').textContent=`Recent match data: ${h.length} completed match${h.length===1?'':'es'} • recent avg ${avg.toFixed(1)} turns • avg biggest hit ${hit.toFixed(1)}.`;} else $('balanceLine').textContent='Complete matches to build your player record.';
   }
-  function renderAll(){renderBoard();renderRack();renderHP();renderStats();updatePreview();renderClocks();renderSiege();}
+  function renderAll(){renderPlayerIdentity();renderBoard();renderRack();renderHP();renderStats();updatePreview();renderClocks();renderSiege();}
 
   function rackClick(i){
     if(gameOver||isCpuTurn()||cpuThinking||!isLocalTurn())return;
@@ -130870,6 +131007,7 @@ zzz`.split('\n'));
     $('overlayDamage').style.display='block';$('overlayDamage').textContent='STALEMATE';$('beginTurnBtn').textContent=gameMode==='online'?'Rematch':'Play Again';$('overlaySecondaryBtn').style.display='block';$('passOverlay').classList.add('show');if(gameMode==='online'&&!fromRemote){syncOnlineState({draw:true});if(onlineRole==='host')void submitOnlineAccountResult('draw');}
   }
   function overlayAction(){
+    if(onlineAbandoned){showMainMenu(true);showLaunchStep('online');createOnlineMatch();return;}
     if(gameOver&&gameMode==='online'){if(pendingIncomingRematch){pendingIncomingRematch=false;if(onlineRole==='host'){newGame(true);syncOnlineState();$('passOverlay').classList.remove('show');}else{onlineConn?.send({type:'rematchAccept'});waitingRematch=true;$('beginTurnBtn').textContent='Waiting for host…';$('beginTurnBtn').disabled=true;}return;}if(!waitingRematch){onlineConn?.send({type:'rematchRequest'});waitingRematch=true;$('beginTurnBtn').textContent='Rematch requested…';$('beginTurnBtn').disabled=true;}return;}
     $('passOverlay').classList.remove('show'); $('beginTurnBtn').style.display='block';$('beginTurnBtn').disabled=false;$('overlaySecondaryBtn').style.display='none';
     if(gameOver){newGame();return;}
@@ -131043,16 +131181,18 @@ zzz`.split('\n'));
   $('recallBtn').addEventListener('click',recall);$('swapBtn').addEventListener('click',toggleSwap);$('passBtn').addEventListener('click',passTurn);$('submitBtn').addEventListener('click',()=>submitMove(false));
   $('swap1').addEventListener('click',()=>performSwap('one'));$('swap3').addEventListener('click',()=>performSwap('three'));$('swapAll').addEventListener('click',()=>performSwap('all'));$('beginTurnBtn').addEventListener('click',overlayAction);$('overlaySecondaryBtn').addEventListener('click',()=>showMainMenu(true));
     const updateLaunchSettingsSummary=()=>{const t=$('launchTimer')?.selectedOptions?.[0]?.textContent||'60 sec Standard',m=$('launchMap')?.selectedOptions?.[0]?.textContent||'Frontline';const shortT=t.replace(' Standard','').replace(' Strategy','');if($('launchSettingsSummary'))$('launchSettingsSummary').textContent=`${shortT} · ${m}`;};
-  $('launchTimer').addEventListener('change',updateLaunchSettingsSummary);$('launchMap').addEventListener('change',updateLaunchSettingsSummary);updateLaunchSettingsSummary();
+  $('launchTimer').addEventListener('change',()=>{updateLaunchSettingsSummary();savePreferences()});$('launchMap').addEventListener('change',()=>{updateLaunchSettingsSummary();savePreferences()});$('launchDifficulty').addEventListener('change',savePreferences);updateLaunchSettingsSummary();
   const syncLaunchName=(v)=>{if($('launchName1'))$('launchName1').value=String(v||'Player 1').slice(0,16);};
   $('onlineNameInput')?.addEventListener('input',e=>syncLaunchName(e.target.value));$('localName1Input')?.addEventListener('input',e=>syncLaunchName(e.target.value));$('accountLoginBtn')?.addEventListener('click',()=>accountAuth('login'));$('accountCreateBtn')?.addEventListener('click',()=>accountAuth('register'));$('accountRefreshBtn')?.addEventListener('click',()=>refreshAccount(false));$('accountLogoutBtn')?.addEventListener('click',logoutAccount);$('accountDeleteBtn')?.addEventListener('click',deleteAccount);$('accountPassword')?.addEventListener('keydown',e=>{if(e.key==='Enter')accountAuth('login')});
-  const showLaunchStep=(name)=>{const main=$('launchMainChoices');if(main)main.hidden=true;['Online','Cpu','Local'].forEach(key=>{const el=$(`launch${key}Panel`);if(el)el.hidden=key.toLowerCase()!==name;});if(name==='online'){if(accountProfile){$('onlineNameInput').value=accountProfile.username;syncLaunchName(accountProfile.username);}void refreshAccount(true);}if(name==='local'&&$('localName1Input'))$('localName1Input').value=$('launchName1').value||'Player 1';$('launchStatus').textContent='';};
+  const showLaunchStep=(name)=>{if($('launchOptions'))$('launchOptions').hidden=name==='online';const main=$('launchMainChoices');if(main)main.hidden=true;['Online','Cpu','Local'].forEach(key=>{const el=$(`launch${key}Panel`);if(el)el.hidden=key.toLowerCase()!==name;});if(name==='online'){if(accountProfile){$('onlineNameInput').value=accountProfile.username;syncLaunchName(accountProfile.username);}}if(name==='local'&&$('localName1Input'))$('localName1Input').value=$('launchName1').value||'Player 1';$('launchStatus').textContent='';};
+  const openPlayerRecord=()=>{renderPortalProfile();$('playerRecordOverlay').classList.add('show')};$('portalRecordBtn').addEventListener('click',openPlayerRecord);$('settingsRecordBtn').addEventListener('click',()=>{$('settingsOverlay').classList.remove('show');openPlayerRecord()});$('closePlayerRecordBtn').addEventListener('click',()=>$('playerRecordOverlay').classList.remove('show'));
   $('chooseOnlineBtn').addEventListener('click',()=>showLaunchStep('online'));
   $('chooseCpuBtn').addEventListener('click',()=>showLaunchStep('cpu'));
   $('chooseLocalBtn').addEventListener('click',()=>showLaunchStep('local'));
-  document.querySelectorAll('[data-launch-back]').forEach(btn=>btn.addEventListener('click',resetLaunchMenu));
-$('startLocalBtn').addEventListener('click',()=>{initAudio();destroyOnline();gameMode='pvp';playerNames=[cleanName($('launchName1').value,'Player 1'),cleanName($('launchName2').value,'Player 2')];timerPreset=$('launchTimer').value;applyBattlefieldPreset($('launchMap').value);$('startOverlay').classList.remove('show');newGame();});
-  $('startCpuBtn').addEventListener('click',()=>{initAudio();destroyOnline();gameMode='cpu';cpuDifficulty=$('launchDifficulty').value;playerNames=[cleanName($('launchName1').value,'You'),'Computer'];timerPreset=$('launchTimer').value;applyBattlefieldPreset($('launchMap').value);$('startOverlay').classList.remove('show');newGame(true);});
+  document.querySelectorAll('[data-launch-back]').forEach(btn=>btn.addEventListener('click',()=>{if(onlineRole==='queue')destroyOnline();resetLaunchMenu();}));
+  $('cancelMatchBtn').addEventListener('click',()=>{destroyOnline();$('launchStatus').textContent='Search canceled.';});
+$('startLocalBtn').addEventListener('click',async()=>{initAudio();await initCrazyGames();destroyOnline();gameMode='pvp';playerAvatars=[localAvatar(),''];playerNames=[cleanName($('launchName1').value,'Player 1'),cleanName($('launchName2').value,'Player 2')];timerPreset=$('launchTimer').value;applyBattlefieldPreset($('launchMap').value);$('startOverlay').classList.remove('show');newGame();});
+  $('startCpuBtn').addEventListener('click',async()=>{initAudio();await initCrazyGames();destroyOnline();gameMode='cpu';playerAvatars=[localAvatar(),''];cpuDifficulty=$('launchDifficulty').value;playerNames=[cleanName($('launchName1').value,'You'),'Computer'];timerPreset=$('launchTimer').value;applyBattlefieldPreset($('launchMap').value);$('startOverlay').classList.remove('show');newGame(true);});
   $('createOnlineBtn').addEventListener('click',()=>{initAudio();createOnlineMatch();});
   $('shareInviteBtn').addEventListener('click',async()=>{if(!onlineCode)return;const ok=await shareText(`Join my Word Havoc match. Match code: ${onlineCode}`);if(!ok)toast(`Match code: ${onlineCode}`);});$('joinOnlineBtn').addEventListener('click',()=>{initAudio();joinOnlineMatch();});$('joinCodeInput').addEventListener('input',e=>e.target.value=e.target.value.toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,6));
   const openHelp=()=>{$('helpOverlay').classList.add('show')};const openSettings=()=>{$('soundToggle').checked=soundEnabled;$('motionToggle').checked=reducedMotion;$('settingsOverlay').classList.add('show')};$('helpBtn').addEventListener('click',openHelp);$('launchHelpBtn').addEventListener('click',openHelp);$('closeHelpBtn').addEventListener('click',()=>$('helpOverlay').classList.remove('show'));
@@ -131066,8 +131206,8 @@ $('startLocalBtn').addEventListener('click',()=>{initAudio();destroyOnline();gam
   window.addEventListener('beforeunload',()=>{if(clockHandle)clearInterval(clockHandle);if(onlineHeartbeatTimer)clearInterval(onlineHeartbeatTimer);onlineClosing=true;clearTimeout(relayRetryTimer);try{onlineSocket?.close(1000,'Page closing');}catch(e){}});
   document.body.classList.toggle('reducedMotion',reducedMotion);$('soundToggle').checked=soundEnabled;$('motionToggle').checked=reducedMotion;
   try{const appPlugin=window.Capacitor?.Plugins?.App;if(appPlugin?.addListener){appPlugin.addListener('backButton',()=>{if(!window.wordHavocBack())showMainMenu();});appPlugin.addListener('appStateChange',({isActive})=>{if(!isActive){if(gameMode==='online'){syncClock();if(onlineRole==='host')syncOnlineState();}else pauseClock();}else if(matchStarted&&!gameOver&&gameMode!=='online')startClock();});}}catch(e){}
-  
-  renderAccountProfile();void refreshAccount(true);newGame();$('passOverlay').classList.remove('show');resetLaunchMenu();$('startOverlay').classList.add('show');updateConnectionBanner('MAIN MENU');
+  if(false){window.addEventListener('load',()=>navigator.serviceWorker.register('./service-worker.js').catch(()=>{}));}
+  importLegacyHistory();loadSavedPreferences();applyPortalIdentity();renderPortalProfile();renderAccountProfile();newGame();$('passOverlay').classList.remove('show');resetLaunchMenu();$('startOverlay').classList.add('show');updateConnectionBanner('MAIN MENU');
 })();
 </script>
 </body>
