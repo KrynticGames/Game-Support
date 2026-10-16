@@ -1,13 +1,15 @@
 const fs=require('fs'),http=require('http'),assert=require('assert');
 const {chromium}=require('playwright');
 (async()=>{
- const source=fs.readFileSync('distribution/word-havoc/index.html','utf8').replace("})();\n</script>","window.__safety={snapshot:()=>statePayload(1),receive:m=>{gameMode='online';onlineRole='guest';applyRemoteState(m)}};})();\n</script>");
+ const source=fs.readFileSync('distribution/word-havoc/index.html','utf8').replace("})();\n</script>","window.__safety={blocked:isContentBlocked,valid:isValidGameWord,name:cleanName,snapshot:()=>statePayload(1),receive:m=>{gameMode='online';onlineRole='guest';applyRemoteState(m)}};})();\n</script>");
  const server=http.createServer((req,res)=>{res.setHeader('Content-Type','text/html');res.end(source)});
  await new Promise(r=>server.listen(8788,r));
  const browser=await chromium.launch({headless:true,executablePath:process.env.WH_CHROMIUM_PATH,args:['--no-sandbox','--disable-dev-shm-usage']});
  const page=await browser.newPage();const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.route('https://sdk.crazygames.com/**',r=>r.fulfill({contentType:'text/javascript',body:''}));
  await page.goto('http://127.0.0.1:8788');await page.click('#chooseCpuBtn');await page.click('#startCpuBtn');
+ const checks=await page.evaluate(()=>({blocked:['fuck','fucker','motherfuckers','pornography','penises','suicide','cocaine'].every(__safety.blocked),safe:['class','assist','assessment','science','shiitake'].every(w=>!__safety.blocked(w)),names:['F.U.C.K','Sh1thead','F4gg0t'].every(w=>__safety.name(w,'Guest')==='Guest'),normal:__safety.name('Cassie','Guest')==='Cassie',valid:__safety.valid('CAT')&&__safety.valid('CATS')&&!__safety.valid('SHIT')}));
+ for(const [name,ok]of Object.entries(checks))assert.equal(ok,true,name);
  for(const draw of [false,true]){
   await page.evaluate(draw=>{
    window.__injected=false;

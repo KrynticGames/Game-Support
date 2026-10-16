@@ -8,7 +8,7 @@ const {chromium}=require('playwright');
  for(const route of ['/privacy','/support','/terms']){
    const response=await page.goto('http://127.0.0.1:8787'+route);assert.equal(response.status(),200);
    assert.match(await response.headerValue('content-security-policy'),/default-src 'none'/);
-   const body=await page.locator('body').innerText();assert.match(body,/October 15, 2026/);assert.doesNotMatch(body,/Draft only|requires a Word Havoc account|six-character code is correct|Privacy policy draft|krynticgames@gmail|email the developer|Report Opponent/);assert.equal(await page.locator('a[href^="mailto:"],form').count(),0);
+   const body=await page.locator('body').innerText();assert.match(body,/October 16, 2026/);assert.doesNotMatch(body,/Draft only|requires a Word Havoc account|six-character code is correct|Privacy policy draft|krynticgames@gmail|email the developer|Report Opponent/);assert.equal(await page.locator('a[href^="mailto:"],form').count(),0);
    const links=await page.locator('a').evaluateAll(els=>els.map(a=>({href:a.getAttribute('href'),target:a.target,rel:a.rel})));
    for(const a of links){assert(a.href&&!/^javascript:/i.test(a.href));if(a.target==='_blank')assert(a.rel.includes('noopener')&&a.rel.includes('noreferrer'));
      if(a.href.startsWith('/'))assert.equal(handler(new Request('http://localhost'+a.href)).status,200);

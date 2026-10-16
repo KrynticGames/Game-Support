@@ -1,0 +1,8 @@
+{
+  "explicit": "\\b(sex|sexual|sexy|porn\\w*|penis|vagina|orgasm\\w*|masturb\\w*|erect(?:ion|ions|ile)?|genital\\w*|prostitut\\w*|rape|raped|rapist\\w*|incest|bestial\\w*|nude|nudity|naked|breast\\w*|testicl\\w*|scrot\\w*|semen|sperm\\w*|fetish\\w*|hentai|erotic\\w*)\\b",
+  "profanity_hate": "\\b(fuck\\w*|shit\\w*|asshole\\w*|bitch\\w*|bastard\\w*|cunt\\w*|fagg?ot\\w*|nigg\\w*|cock|dick|pussy|whore\\w*|slut\\w*|retard\\w*|hitler|nazi\\w*|holocaust|ku klux|supremac\\w*)\\b",
+  "selfharm_graphic": "\\b(suicid\\w*|self.harm|behead\\w*|decapitat\\w*|tortur\\w*|mutilat\\w*|disembowel\\w*|necroph\\w*|cannibal\\w*|serial killer|mass murderer|massacre\\w*|abortion\\w*)\\b",
+  "drugs_alcohol_gambling": "\\b(cocaine|heroin|methamphetamine|marijuana|cannabis|lsd|ecstasy|ketamine|opioid\\w*|opium|tobacco|cigarette\\w*|cigar\\w*|smok\\w*|alcohol\\w*|beer\\w*|wine\\w*|whisk[ey]*|vodka|tequila|champagne|brew\\w*|liquor|cocktail\\w*|drunk\\w*|casino\\w*|gambl\\w*|poker|blackjack|roulette)\\b",
+  "sensitive_topics": "\\b(bondage|adultery|affair|contracept\\w*|pregnan\\w*|abortion\\w*|intercourse|coitus|brothel\\w*|pedoph\\w*|paedoph\\w*|molest\\w*|stds?|venereal|syphilis|gonorrh\\w*|aids|hiv|condom\\w*|vibrator\\w*|dildo\\w*|stripper\\w*|strippers|lust|orgy|orgies|overdose\\w*|drug\\w*|meth|amphetamine\\w*|hallucin\\w*|cannibal\\w*|assassin\\w*|murder\\w*|slaughter\\w*|bloodbath|slay\\w*|gore|gory|snuff|choke\\w*|lynch\\w*)\\b",
+  "additional_mature_topics": "\\b(damn|dammit|hell|crap|poop(?:s|ing)?|anus|anal|butt(?:s|hole\\w*)?|boob\\w*|tit|tits|terroris\\w*|kidnap\\w*|abduct\\w*|abuse\\w*|seduc\\w*|playboy|playgirl|hustler|penthouse|seppuku|hara.?kiri|slasher|strangl\\w*)\\b"
+}

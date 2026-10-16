@@ -1,0 +1,16 @@
+{
+  "version": 23,
+  "before": 10146,
+  "after": 9675,
+  "scope": "Whole-bank keyword screening, with conservative exclusion of adult/graphic/abusive topics. Not a formal age rating, comprehensive semantic review or full fact check.",
+  "excludedQuestions": 471,
+  "reasonCounts": {
+    "drugs_alcohol_gambling": 181,
+    "additional_mature_topics": 60,
+    "sensitive_topics": 122,
+    "selfharm_graphic": 29,
+    "profanity_hate": 58,
+    "explicit": 48
+  },
+  "actions": []
+}

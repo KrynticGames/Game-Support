@@ -1,0 +1,17 @@
+{
+  "reviewDate": "2026-10-16",
+  "brainQuestionRows": 9675,
+  "excludedQuestionRows": 471,
+  "testsPassed": [
+    "brain-safety.cjs",
+    "policy-content.cjs",
+    "remote-content-safety.cjs",
+    "crazygames-profile.cjs",
+    "multiplayer-dom.cjs",
+    "support-pages.cjs"
+  ],
+  "actualCrazyGamesCloudVerified": false,
+  "formalChildSafetyCertification": false,
+  "privateDeveloperRequestChannelConfigured": false,
+  "railwayDeploymentPerformed": false
+}
