@@ -130623,7 +130623,7 @@ zzz`.split('\n'));
     if(gameMode==='online')return;pauseClock();$('overlaySecondaryBtn').style.display='none';$('overlayTitle').textContent='Match Ready';$('overlayDamage').style.display='none';
     const timeText=TIMER_PRESETS[timerPreset]==null?'Untimed practice':`${formatClock(TIMER_PRESETS[timerPreset])} turn timer • timeout = -${TIMEOUT_HP_COST} HP + forfeited turn`;
     const diffText=gameMode==='cpu'?`<br><b>Computer difficulty: ${cpuDifficulty.toUpperCase()}</b>`:'';
-    const starterVerb=playerLabel(turn)==='You'?'start':'starts';$('overlayText').innerHTML=`<b>${playerLabel(turn)}</b> ${starterVerb}. Your attack total is the damage dealt before Armor. No hidden opening reduction.<br><br><b>${timeText}</b>${diffText}<br>Win by knockout or by holding a Siege control advantage.`;
+    const starterVerb=playerLabel(turn)==='You'?'start':'starts';setOverlayMessage(`<b>${playerLabel(turn)}</b> ${starterVerb}. Your attack total is the damage dealt before Armor. No hidden opening reduction.<br><br><b>${timeText}</b>${diffText}<br>Win by knockout or by holding a Siege control advantage.`);
     $('beginTurnBtn').style.display='block';$('beginTurnBtn').textContent=`Begin ${playerLabel(turn)} Turn`;$('passOverlay').classList.add('show');
   }
 
@@ -130990,20 +130990,37 @@ zzz`.split('\n'));
       }
       return;
     }
-    $('overlayTitle').textContent='Pass Device'; $('overlayText').innerHTML=`${text}<br><br>Hand the device to ${playerLabel(1-who)}. Their rack is hidden until they begin.`;
+    $('overlayTitle').textContent='Pass Device'; setOverlayMessage(`${text}<br><br>Hand the device to ${playerLabel(1-who)}. Their rack is hidden until they begin.`);
     $('overlayDamage').style.display=showDamage?'block':'none';$('overlayDamage').textContent=showDamage?`${damage} DAMAGE`:'';$('beginTurnBtn').style.display='block';$('beginTurnBtn').textContent=`Begin ${playerLabel(1-who)} Turn`; $('passOverlay').classList.add('show');
+  }
+  // Rebuild formatting without trusting remote HTML or attributes.
+  function setOverlayMessage(message){
+    const template=document.createElement('template');template.innerHTML=String(message);
+    const safe=document.createDocumentFragment();
+    function copy(node,parent){
+      if(node.nodeType===3){parent.appendChild(document.createTextNode(node.textContent));return;}
+      if(node.nodeType!==1)return;
+      if(node.tagName!=='B'&&node.tagName!=='BR'){
+        parent.appendChild(document.createTextNode(node.textContent||''));return;
+      }
+      const element=document.createElement(node.tagName.toLowerCase());
+      for(const child of node.childNodes)copy(child,element);
+      parent.appendChild(element);
+    }
+    for(const node of template.content.childNodes)copy(node,safe);
+    $('overlayText').replaceChildren(safe);
   }
   function showGameOver(winner,a,fromRemote=false){
     pauseClock(); recordMatch(winner); renderStats();
     const winnerName=playerLabel(winner);$('overlayTitle').textContent=`${winnerName} Wins`;
     const reason=a.surrender?`<b>${playerLabel(1-winner)}</b> surrendered the match.`:a.timeoutPenalty?`<b>${playerLabel(1-winner)}</b> timed out at critical health; the ${TIMEOUT_HP_COST} HP clock-burn penalty caused the knockout.`:a.siege?`<b>${winnerName}</b> held ${SIEGE_TARGET}+ battle squares with a lead of ${SIEGE_MARGIN}+ through the opponent's full turn.`:a.stalemate?`Four straight passes ended the match. ${winnerName} had more HP.`:(a.word?`<b>${a.word}</b> delivered the final ${a.damage} damage.`:'The opponent ran out of HP.');
-    $('overlayText').innerHTML=`${reason}<br><br><b>Match:</b> ${stats.turns} turns • ${stats.totalDamage} total damage • biggest hit ${stats.biggestHit} • ${stats.combos} Crossfire • ${stats.counters} Counterstrike${stats.counters===1?'':'s'} • ${stats.captures} capture${stats.captures===1?'':'s'} • ${stats.timeouts} timeout${stats.timeouts===1?'':'s'}.`;
+    setOverlayMessage(`${reason}<br><br><b>Match:</b> ${stats.turns} turns • ${stats.totalDamage} total damage • biggest hit ${stats.biggestHit} • ${stats.combos} Crossfire • ${stats.counters} Counterstrike${stats.counters===1?'':'s'} • ${stats.captures} capture${stats.captures===1?'':'s'} • ${stats.timeouts} timeout${stats.timeouts===1?'':'s'}.`);
     $('overlayDamage').style.display='block';$('overlayDamage').textContent='VICTORY';$('beginTurnBtn').textContent=gameMode==='online'?'Rematch':'Play Again';$('overlaySecondaryBtn').style.display='block';$('passOverlay').classList.add('show');sfx('win');if(gameMode==='online'&&!fromRemote){syncOnlineState({winner,data:a});if(onlineRole==='host')void submitOnlineAccountResult(winner===0?'host':'guest');}
   }
   function showStalemate(fromRemote=false){
     pauseClock(); recordMatch(-1); renderStats();
     $('overlayTitle').textContent='Draw';
-    $('overlayText').innerHTML=`Four straight passes ended the match with both players on ${players[0].hp} HP.<br><br><b>Match:</b> ${stats.turns} turns • ${stats.totalDamage} total damage • biggest hit ${stats.biggestHit} • ${stats.combos} Crossfire • ${stats.counters} Counterstrike${stats.counters===1?'':'s'} • ${stats.captures} capture${stats.captures===1?'':'s'} • ${stats.timeouts} timeout${stats.timeouts===1?'':'s'}.`;
+    setOverlayMessage(`Four straight passes ended the match with both players on ${players[0].hp} HP.<br><br><b>Match:</b> ${stats.turns} turns • ${stats.totalDamage} total damage • biggest hit ${stats.biggestHit} • ${stats.combos} Crossfire • ${stats.counters} Counterstrike${stats.counters===1?'':'s'} • ${stats.captures} capture${stats.captures===1?'':'s'} • ${stats.timeouts} timeout${stats.timeouts===1?'':'s'}.`);
     $('overlayDamage').style.display='block';$('overlayDamage').textContent='STALEMATE';$('beginTurnBtn').textContent=gameMode==='online'?'Rematch':'Play Again';$('overlaySecondaryBtn').style.display='block';$('passOverlay').classList.add('show');if(gameMode==='online'&&!fromRemote){syncOnlineState({draw:true});if(onlineRole==='host')void submitOnlineAccountResult('draw');}
   }
   function overlayAction(){
